@@ -324,10 +324,10 @@ const SHOP = {
    ============================================================= */
 
 const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyCY2fb1CufGTrJWzngr6V-baF4jk8B79ps",
+  authDomain: "komatsu-gym.firebaseapp.com",
+  projectId: "komatsu-gym",
+  storageBucket: "komatsu-gym.firebasestorage.app",
+  messagingSenderId: "643187645518",
+  appId: "1:643187645518:web:882edc6fb4edcd3e5ab71f"
 };
