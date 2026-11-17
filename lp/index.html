@@ -212,11 +212,9 @@
   <div class="sp-tag">PERSONAL TRAINING</div>
 </div>
 <script>
-/* 起動画面: 同じタブで2回目以降は出さない。タップで飛ばせる */
+/* 起動画面: ページを開くたび（再読み込みでも）出す。タップで飛ばせる */
 (function(){
-  var s=document.getElementById("splash"),seen=false;
-  try{seen=sessionStorage.getItem("kk_splash")==="1";sessionStorage.setItem("kk_splash","1");}catch(e){}
-  if(seen){s.remove();return;}
+  var s=document.getElementById("splash");
   var done=false;function bye(){if(done)return;done=true;s.classList.add("bye");setTimeout(function(){s.remove()},600);}
   s.addEventListener("click",bye);setTimeout(bye,2700);
 })();
