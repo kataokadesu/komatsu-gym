@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>きん肉こまつ｜パーソナルトレーニング</title>
+<meta name="description" content="きん肉こまつは、マンツーマンで体づくりを支えるパーソナルトレーニングジムです。ダイエット・ボディメイク・体力づくりまで、目的に合わせて指導します。">
+<link rel="icon" href="logo-black.png">
+<style>
+  :root{
+    --ink:#0a0a0a; --paper:#fff; --lime:#ffffff; --smoke:#f4f4f5; --line:#e4e4e7; --muted:#71717a;
+    --serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.8;-webkit-font-smoothing:antialiased}
+  img{max-width:100%;display:block}
+  a{color:inherit}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  /* 仮置き（要確認）の目印 */
+  .tbd{background:#fef08a;color:#0a0a0a;padding:0 4px;border-radius:3px;font-style:normal}
+
+  /* ヘッダー */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:.12em}
+  .brand img{width:34px;height:34px}
+  header nav{display:flex;gap:22px;font-size:13px;font-weight:700;letter-spacing:.06em}
+  header nav a{text-decoration:none}
+  header nav a:hover{text-decoration:underline}
+  .hd-cta{background:var(--ink);color:var(--paper);text-decoration:none;font-size:13px;font-weight:700;padding:9px 16px;border-radius:9px}
+  @media(max-width:760px){header nav{display:none}}
+
+  /* ヒーロー */
+  .hero{padding:72px 0 80px;border-bottom:2px solid var(--ink)}
+  .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+  .hyrox{display:inline-block;margin-top:12px;background:var(--ink);color:var(--lime);font-size:12px;font-weight:900;letter-spacing:.12em;padding:6px 12px;border-radius:6px}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.42em;color:var(--muted)}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,58px);line-height:1.3;letter-spacing:.06em;margin:14px 0 20px}
+  .hero p.lead{font-size:16px;max-width:30em;color:#27272a}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:15px;padding:15px 26px;border-radius:11px;border:1.5px solid var(--ink);transition:transform .1s}
+  .btn:active{transform:scale(.98)}
+  .btn.solid{background:var(--ink);color:var(--paper)}
+  .btn.ghost{background:var(--paper);color:var(--ink)}
+  .hero-logo{position:relative;max-width:340px;margin-left:auto;width:100%;text-align:center}
+  .hero-logo img{width:100%;aspect-ratio:1;animation:pop .8s cubic-bezier(.2,.9,.3,1.2) both}
+  .hero-name{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.4vw,34px);letter-spacing:.14em;margin-top:16px;animation:fadeup .7s ease .5s both}
+  @keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+  @media(max-width:760px){
+    .hero{padding:44px 0 56px}
+    .hero .wrap{grid-template-columns:1fr}
+    .hero-logo{max-width:180px;margin:0 auto;order:-1}
+    .hero-cta .btn{flex:1 1 100%}
+  }
+
+  /* セクション共通 */
+  section{padding:84px 0}
+  section.alt{background:var(--smoke)}
+  section.dark{background:var(--ink);color:var(--paper)}
+  .sec-head{margin-bottom:40px}
+  .sec-head .en{font-size:11px;font-weight:700;letter-spacing:.42em;color:var(--muted)}
+  .sec-head h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.6vw,34px);letter-spacing:.06em;line-height:1.5;margin-top:8px}
+  section.dark .sec-head .en{color:#a1a1aa}
+  @media(max-width:760px){section{padding:60px 0}}
+
+  /* お悩み */
+  .worries{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .worry{border:1.5px solid var(--ink);border-radius:14px;padding:18px 20px;background:var(--paper);font-weight:700;display:flex;gap:12px;align-items:flex-start}
+  .worry::before{content:"";flex:0 0 10px;height:10px;margin-top:9px;background:var(--ink);border-radius:2px}
+  .answer{margin-top:34px;font-family:var(--serif);font-size:clamp(18px,2.6vw,24px);font-weight:600;text-align:center;letter-spacing:.06em}
+
+  /* 特徴 */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .feature{border:1.5px solid var(--ink);border-radius:16px;padding:28px 24px;background:var(--paper)}
+  .feature .no{font-family:var(--serif);font-size:40px;font-weight:600;line-height:1}
+  .feature h3{font-size:18px;margin:16px 0 10px;letter-spacing:.04em}
+  .feature p{font-size:14px;color:#3f3f46}
+  @media(max-width:860px){.features{grid-template-columns:1fr}}
+
+  /* 目的 */
+  .goals{display:flex;flex-wrap:wrap;gap:10px}
+  .goal{border:1.5px solid var(--paper);border-radius:40px;padding:10px 20px;font-weight:700;font-size:15px}
+  .goal.fill{background:var(--paper);color:var(--ink)}
+  .dark-note{margin-top:26px;color:#d4d4d8;font-size:14px;max-width:40em}
+
+  /* 料金 */
+  .trial{background:var(--ink);color:var(--paper);border-radius:18px;padding:30px 28px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-bottom:28px;border:2px solid var(--lime)}
+  .trial .lbl{font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--lime)}
+  .trial h3{font-size:22px;margin:4px 0 6px}
+  .trial .big{font-size:52px;font-weight:900;line-height:1;color:var(--lime);letter-spacing:-.02em}
+  .trial .big small{font-size:18px}
+  .trial p{font-size:14px;color:#d4d4d8}
+  .trial .free{display:inline-block;margin-top:10px;background:var(--lime);color:var(--ink);font-weight:900;font-size:14px;padding:4px 12px;border-radius:6px}
+  @media(max-width:640px){.trial{grid-template-columns:1fr}}
+  .ptabs{display:flex;gap:8px;margin-bottom:22px}
+  .ptabs button{font:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:40px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+  .ptabs button.on{background:var(--ink);color:var(--paper)}
+  .ppanel[hidden]{display:none}
+  .ptables{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.ptables{grid-template-columns:1fr}}
+  .ptable{border:1.5px solid var(--ink);border-radius:16px;padding:22px 22px 10px;background:var(--paper)}
+  .ptable h3{font-size:17px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin-bottom:6px}
+  .ptable h3 small{font-size:12px;color:var(--muted);font-weight:500}
+  .prow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+  .prow:first-of-type{border-top:none}
+  .prow b{font-size:16px}
+  .prow .per{display:block;font-size:12px;color:var(--muted);font-weight:500}
+  .prow .yen{font-size:24px;font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+  .prow .yen small{font-size:13px;margin-left:1px}
+  .ptable.wide{grid-column:1/-1}
+  .ptabs button .badge{border:1.2px solid currentColor}
+  .badge{display:inline-block;background:transparent;color:inherit;font-size:12px;font-weight:900;padding:3px 10px;border-radius:6px;margin-left:6px;vertical-align:middle}
+  .conds{margin-top:18px;border:1.5px solid var(--ink);border-radius:16px;padding:20px 22px;background:var(--paper)}
+  .conds h4{font-size:15px;margin-bottom:8px}
+  .conds ul{padding-left:1.2em;font-size:14px}
+  .conds li{padding:3px 0}
+  .note{font-size:12.5px;color:var(--muted);margin-top:16px}
+
+  /* 流れ */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:st}
+  .step{border-top:2px solid var(--ink);padding-top:16px}
+  .step .n{font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--muted)}
+  .step h3{font-size:17px;margin:6px 0 8px}
+  .step p{font-size:14px;color:#3f3f46}
+  @media(max-width:860px){.flow{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.flow{grid-template-columns:1fr}}
+
+  /* 予約アプリ */
+  .app{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+  .app ul{list-style:none;margin-top:6px}
+  .app li{padding:12px 0;border-bottom:1px solid var(--line);font-weight:700;display:flex;gap:12px}
+  .app li span{color:var(--muted);font-weight:500;font-size:14px;display:block}
+  .phone{max-width:280px;margin:0 auto;border:2px solid var(--ink);border-radius:30px;padding:14px;background:var(--paper)}
+  .phone .bar{display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--ink);padding:4px 4px 10px;font-weight:900;font-size:14px}
+  .phone .bar img{width:22px;height:22px}
+  .phone .tk{background:var(--ink);color:var(--paper);border-radius:12px;padding:14px;margin:12px 0}
+  .phone .tk .l{font-size:10px;letter-spacing:.2em;color:#a1a1aa}
+  .phone .tk .v{font-size:34px;font-weight:900;line-height:1.1}
+  .phone .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .phone .s{border:1.5px solid var(--line);border-radius:8px;text-align:center;font-weight:900;font-size:13px;padding:8px 0}
+  .phone .s.on{border-color:var(--ink);background:var(--smoke)}
+  .phone .s.x{opacity:.4}
+  @media(max-width:760px){.app{grid-template-columns:1fr}}
+
+  /* FAQ */
+  .faq details{border-bottom:1.5px solid var(--ink);padding:18px 0}
+  .faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:16px}
+  .faq summary::after{content:"＋";font-weight:900}
+  .faq details[open] summary::after{content:"－"}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq details p{margin-top:10px;font-size:14px;color:#3f3f46}
+
+  /* 店舗情報 */
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+  .info dl{display:grid;grid-template-columns:7em 1fr;border-top:1.5px solid var(--ink)}
+  .info dt,.info dd{padding:14px 0;border-bottom:1px solid var(--line)}
+  .info dt{font-weight:700;font-size:14px}
+  .info dd{font-size:15px}
+  .map{width:100%;text-decoration:none;flex-direction:column;gap:6px;border:1.5px solid var(--ink);border-radius:16px;min-height:260px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;background:var(--smoke);text-align:center;padding:20px}
+  @media(max-width:760px){.info{grid-template-columns:1fr}}
+
+  /* CTA */
+  .cta{text-align:center}
+  .cta img{width:84px;height:84px;margin:0 auto 18px}
+  .cta h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,36px);letter-spacing:.06em;line-height:1.5}
+  .cta p{color:#d4d4d8;margin:12px 0 28px}
+  .cta .btn.solid{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  .cta .btn.ghost{background:transparent;color:var(--paper);border-color:var(--paper)}
+  .cta .hero-cta{justify-content:center}
+
+  footer{border-top:2px solid var(--ink);padding:28px 0;font-size:12px;color:var(--muted)}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  /* スマホ下部固定ボタン */
+  .sticky-cta{display:none}
+  @media(max-width:760px){
+    .sticky-cta{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:60;gap:8px}
+    .sticky-cta .btn{flex:1;padding:13px 10px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+    footer{padding-bottom:90px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="logo-black.png" alt="">きん肉こまつ</a>
+    <nav>
+      <a href="#feature">特徴</a>
+      <a href="#price">料金</a>
+      <a href="#flow">ご利用の流れ</a>
+      <a href="#faq">よくある質問</a>
+      <a href="#access">アクセス</a>
+    </nav>
+    <a class="hd-cta" href="https://kataokadesu.github.io/komatsu-gym/?taiken">はじめての方</a>
+  </div>
+</header>
+
+<!-- ヒーロー -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">PERSONAL TRAINING ／ OSAKA SAKAI</div>
+      <span class="hyrox">HYROX 公式認定ジム</span>
+      <h1>あなたの目的に、<br>まっすぐ効く。</h1>
+      <p class="lead">きん肉こまつは、大阪・堺の完全予約制パーソナルトレーニングジム。40代・50代や運動が初めての方を中心に、マンツーマン・ペアのパーソナルから、世界的フィットネスレース「HYROX」の公式認定ジムとしてのグループトレーニングまで。最初のヒアリングで目的を伺い、一人ひとりに合わせたメニューで進めます。</p>
+      <div class="hero-cta">
+        <a class="btn solid" href="https://kataokadesu.github.io/komatsu-gym/?taiken">はじめての方はこちら</a>
+        <a class="btn ghost" href="#price">料金を見る</a>
+      </div>
+    </div>
+    <div class="hero-logo"><img src="logo-black.png" alt="きん肉こまつ ロゴ"><div class="hero-name">きん肉こまつ</div></div>
+  </div>
+</section>
+
+<!-- お悩み -->
+<section class="alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">FOR YOU</div>
+      <h2>こんなお悩み、ありませんか？</h2>
+    </div>
+    <div class="worries">
+      <div class="worry">ダイエットを何度も始めては挫折している</div>
+      <div class="worry">ジムに通っても、やり方が合っているか分からない</div>
+      <div class="worry">お腹まわりや二の腕など、気になる部位を引き締めたい</div>
+      <div class="worry">体力が落ちてきて、疲れやすくなった</div>
+      <div class="worry">ボディメイク大会に挑戦してみたい</div>
+      <div class="worry">一人だと続かない。誰かに見てほしい</div>
+    </div>
+    <p class="answer">その悩み、トレーナーと一緒に解決しましょう。</p>
+  </div>
+</section>
+
+<!-- 特徴 -->
+<section id="feature">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">FEATURES</div>
+      <h2>きん肉こまつの3つの特徴</h2>
+    </div>
+    <div class="features">
+      <div class="feature">
+        <div class="no">01</div>
+        <h3>完全マンツーマン指導</h3>
+        <p>トレーナーがフォームから負荷まで、つきっきりで見ます。会員さまは40代・50代や初心者の方が中心。完全予約制なので、周りを気にせずトレーニングできます。</p>
+      </div>
+      <div class="feature">
+        <div class="no">02</div>
+        <h3>ヒアリングから始まるオーダーメイド</h3>
+        <p>目的・強化したい部位・運動経験を最初にじっくり伺い、あなた専用のメニューを組み立てます。</p>
+      </div>
+      <div class="feature">
+        <div class="no">03</div>
+        <h3>回数券・月額・ペア・HYROXから選べる</h3>
+        <p>通い方に合わせてプランを選べます。予約は専用アプリから24時間いつでも。友人と一緒のペアなら1名あたりの料金がお得です。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 目的 -->
+<section class="dark">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">YOUR GOAL</div>
+      <h2>目的に合わせて、何でもご相談ください。</h2>
+    </div>
+    <div class="goals">
+      <span class="goal fill">ダイエット</span>
+      <span class="goal fill">ボディメイク</span>
+      <span class="goal fill">体力づくり</span>
+      <span class="goal fill">筋力向上</span>
+      <span class="goal fill">ボディメイク大会出場</span>
+      <span class="goal fill">HYROX出場</span>
+      <span class="goal">姿勢改善</span>
+      <span class="goal">お尻・ふともも</span>
+      <span class="goal">ウエスト</span>
+      <span class="goal">二の腕</span>
+      <span class="goal">背中</span>
+    </div>
+    <p class="dark-note">全身はもちろん、肩・胸・ウエスト・お尻・ふともも・背中・二の腕など、部位を絞ったトレーニングも可能です。運動経験は問いません。</p>
+  </div>
+</section>
+
+<!-- 料金 -->
+<section class="alt" id="price">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">PRICE</div>
+      <h2>料金プラン</h2>
+    </div>
+    <div class="trial">
+      <div>
+        <div class="lbl">TRIAL</div>
+        <h3>体験トレーニング</h3>
+        <p>ペアは1名 2,200円</p>
+        <span class="free">体験当日のご入会で体験料は無料</span>
+      </div>
+      <div class="big">3,300<small>円</small></div>
+    </div>
+
+    <div class="ptabs" role="tablist">
+      <button class="on" data-p="ticket" role="tab">回数券</button>
+      <button data-p="monthly" role="tab">月額プラン<span class="badge">2027年1月〜</span></button>
+    </div>
+
+    <!-- 回数券 -->
+    <div class="ppanel" id="p-ticket">
+      <div class="ptables">
+        <div class="ptable"><h3>パーソナルトレーニング</h3>
+          <div class="prow"><div><b>単発</b><span class="per">1回あたり 9,900円</span></div><div class="yen">9,900<small>円</small></div></div>
+          <div class="prow"><div><b>8回券</b><span class="per">1回あたり 7,700円</span></div><div class="yen">61,600<small>円</small></div></div>
+          <div class="prow"><div><b>16回券</b><span class="per">1回あたり 5,500円</span></div><div class="yen">88,000<small>円</small></div></div>
+        </div>
+        <div class="ptable"><h3>パーソナル ペア <small>1名あたりの料金</small></h3>
+          <div class="prow"><div><b>単発</b><span class="per">1回あたり 7,700円</span></div><div class="yen">7,700<small>円</small></div></div>
+          <div class="prow"><div><b>8回券</b><span class="per">1回あたり 5,500円</span></div><div class="yen">44,000<small>円</small></div></div>
+          <div class="prow"><div><b>16回券</b><span class="per">1回あたり 3,300円</span></div><div class="yen">52,800<small>円</small></div></div>
+        </div>
+        <div class="ptable wide"><h3>HYROXトレーニング <small>グループ・最大4名</small></h3>
+          <div class="prow"><div><b>単発</b><span class="per">1回あたり 5,500円</span></div><div class="yen">5,500<small>円</small></div></div>
+          <div class="prow"><div><b>5回券</b><span class="per">1回あたり 4,400円</span></div><div class="yen">22,000<small>円</small></div></div>
+          <div class="prow"><div><b>10回券</b><span class="per">1回あたり 3,300円</span></div><div class="yen">33,000<small>円</small></div></div>
+        </div>
+      </div>
+      <p class="note">※回数券の有効期限は、初回ご利用日から6か月です。<br>※料金は前払い制です。1回以上ご利用後の回数券は返金いたしかねます。<br>※キャンセルは前日23:59までにお願いします。当日キャンセル・無断キャンセルは1回分の消化となります。</p>
+    </div>
+
+    <!-- 月額プラン -->
+    <div class="ppanel" id="p-monthly" hidden>
+      <div class="ptables">
+        <div class="ptable"><h3>パーソナルトレーニング</h3>
+          <div class="prow"><div><b>月2回</b><span class="per">1回あたり 6,000円</span></div><div class="yen">12,000<small>円</small></div></div>
+          <div class="prow"><div><b>月4回</b><span class="per">1回あたり 5,500円</span></div><div class="yen">22,000<small>円</small></div></div>
+          <div class="prow"><div><b>月8回</b><span class="per">1回あたり 5,000円</span></div><div class="yen">40,000<small>円</small></div></div>
+          <div class="prow"><div><b>月12回</b><span class="per">1回あたり 4,500円</span></div><div class="yen">54,000<small>円</small></div></div>
+        </div>
+        <div class="ptable"><h3>パーソナル ペア <small>1名あたりの料金</small></h3>
+          <div class="prow"><div><b>月2回</b><span class="per">1回あたり 4,000円</span></div><div class="yen">8,000<small>円</small></div></div>
+          <div class="prow"><div><b>月4回</b><span class="per">1回あたり 3,500円</span></div><div class="yen">14,000<small>円</small></div></div>
+          <div class="prow"><div><b>月8回</b><span class="per">1回あたり 3,000円</span></div><div class="yen">24,000<small>円</small></div></div>
+          <div class="prow"><div><b>月12回</b><span class="per">1回あたり 2,500円</span></div><div class="yen">30,000<small>円</small></div></div>
+        </div>
+        <div class="ptable"><h3>HYROXトレーニング</h3>
+          <div class="prow"><div><b>月2回</b><span class="per">1回あたり 4,000円</span></div><div class="yen">8,000<small>円</small></div></div>
+          <div class="prow"><div><b>月4回</b><span class="per">1回あたり 3,500円</span></div><div class="yen">14,000<small>円</small></div></div>
+          <div class="prow"><div><b>月8回</b><span class="per">1回あたり 3,000円</span></div><div class="yen">24,000<small>円</small></div></div>
+        </div>
+        <div class="ptable"><h3>HYROX ペア <small>1名あたりの料金</small></h3>
+          <div class="prow"><div><b>月2回</b><span class="per">1回あたり 3,500円</span></div><div class="yen">7,000<small>円</small></div></div>
+          <div class="prow"><div><b>月4回</b><span class="per">1回あたり 3,000円</span></div><div class="yen">12,000<small>円</small></div></div>
+          <div class="prow"><div><b>月8回</b><span class="per">1回あたり 2,500円</span></div><div class="yen">20,000<small>円</small></div></div>
+        </div>
+        <div class="ptable wide"><h3>オンラインコース <small>ジムに通わない方向け</small></h3>
+          <div class="prow"><div><b>食事サポート</b><span class="per">食事メニューのサポート</span></div><div class="yen">10,000<small>円</small></div></div>
+          <div class="prow"><div><b>トータルサポート</b><span class="per">食事メニュー＋トレーニング構成</span></div><div class="yen">20,000<small>円</small></div></div>
+        </div>
+      </div>
+      <div class="conds">
+        <h4>月額プランの共通条件</h4>
+        <ul>
+          <li>入会金 0円</li>
+          <li>最低継続期間 3か月</li>
+          <li>前月26日に翌月分を自動決済（カード／口座振替）</li>
+          <li>キャンセル・変更は前日23:59まで</li>
+          <li>当日キャンセル・無断欠席は1回消化／翌月への繰り越しなし</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">※表示価格はすべて税込です。</p>
+  </div>
+</section>
+
+<!-- ご利用の流れ -->
+<section id="flow">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">FLOW</div>
+      <h2>ご利用の流れ</h2>
+    </div>
+    <div class="flow">
+      <div class="step"><div class="n">STEP 01</div><h3>体験のお申し込み</h3><p>「はじめての方」ボタンから、カウンセリング＋体験をお申し込みいただけます。</p></div>
+      <div class="step"><div class="n">STEP 02</div><h3>ヒアリングシート</h3><p>目的・気になる部位・運動経験などをスマホで入力。当日すぐに始められます。</p></div>
+      <div class="step"><div class="n">STEP 03</div><h3>カウンセリング＋体験</h3><p>ご来店いただき、トレーナーとカウンセリングのあと実際にトレーニングを体感します。</p></div>
+      <div class="step"><div class="n">STEP 04</div><h3>ご入会</h3><p>回数券か月額プランを選べば、あとはアプリで予約するだけ。体験当日のご入会で体験料は無料です。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 予約アプリ -->
+<section class="alt">
+  <div class="wrap app">
+    <div>
+      <div class="sec-head" style="margin-bottom:20px">
+        <div class="en">RESERVATION APP</div>
+        <h2>予約もチケットも、<br>スマホひとつで。</h2>
+      </div>
+      <ul>
+        <li>📅<div>空き枠を見てすぐ予約<span>日付と時間を選ぶだけ。前日までならアプリからキャンセルOK。</span></div></li>
+        <li>🎟️<div>チケット残数がひと目で分かる<span>使用・返却の履歴もいつでも確認できます。</span></div></li>
+        <li>👥<div>友人・家族と「相乗り」予約<span>グループを作って、同じ時間に一緒にトレーニング。</span></div></li>
+        <li>📝<div>ヒアリングシートもアプリで<span>来店前に入力しておけば、当日すぐに始められます。</span></div></li>
+      </ul>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <div class="bar"><img src="logo-black.png" alt="">きん肉こまつ</div>
+      <div class="tk"><div class="l">TICKETS</div><div class="v">8<small style="font-size:13px"> 枚</small></div></div>
+      <div class="slots">
+        <div class="s">10:00</div><div class="s x">11:00</div><div class="s">12:00</div>
+        <div class="s">13:00</div><div class="s on">14:00</div><div class="s">15:00</div>
+        <div class="s x">16:00</div><div class="s">17:00</div><div class="s">18:00</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">FAQ</div>
+      <h2>よくある質問</h2>
+    </div>
+    <div class="faq">
+      <details><summary>運動経験がまったくありませんが大丈夫ですか？</summary><p>大丈夫です。最初のヒアリングで経験や体力を伺い、無理のない内容から始めます。</p></details>
+      <details><summary>回数券の有効期限はありますか？</summary><p>初めてご利用いただいた日から6か月間です。</p></details>
+      <details><summary>キャンセルはできますか？</summary><p>前日23:59までならアプリから無料でキャンセルでき、チケットも戻ります。当日キャンセル・無断キャンセルは1回分の消化となります。</p></details>
+      <details><summary>友人と一緒に受けられますか？</summary><p>はい。アプリの「相乗り」機能で、同じ時間に一緒にトレーニングできます。ペア料金は1名あたりの料金がお得になります。</p></details>
+      <details><summary>HYROXトレーニングとは何ですか？</summary><p>ランニングと8種目のワークアウトを組み合わせた世界的フィットネスレース「HYROX」に向けた、最大4名のグループトレーニングです。きん肉こまつはHYROXの公式認定ジムです。大会出場を目指す方はもちろん、体力づくりにもおすすめです。</p></details>
+      <details><summary>ジムに通えなくても指導を受けられますか？</summary><p>はい。オンラインコース（食事サポート 月10,000円／トータルサポート 月20,000円）をご用意しています。</p></details>
+      <details><summary>営業時間を教えてください。</summary><p>11:00〜22:00（完全予約制）です。定休日は不定休です。深井駅から徒歩8分、駐車場もございますので車でもお越しいただけます。</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- 店舗情報 -->
+<section class="alt" id="access">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="en">ACCESS</div>
+      <h2>店舗情報</h2>
+    </div>
+    <div class="info">
+      <dl>
+        <dt>店名</dt><dd>きん肉こまつ</dd>
+        <dt>住所</dt><dd>大阪府堺市中区深井沢町307-9</dd>
+        <dt>営業時間</dt><dd>11:00〜22:00（完全予約制）</dd>
+        <dt>定休日</dt><dd>不定休</dd>
+        <dt>アクセス</dt><dd>泉北高速鉄道「深井駅」から徒歩8分</dd>
+        <dt>駐車場</dt><dd>あり</dd>
+        <dt>お問い合わせ</dt><dd><a href="https://www.instagram.com/kinnikukomatsu/" target="_blank" rel="noopener">Instagram @kinnikukomatsu</a></dd>
+      </dl>
+      <a class="map" href="https://www.google.com/maps/search/?api=1&amp;query=%E5%A4%A7%E9%98%AA%E5%BA%9C%E5%A0%BA%E5%B8%82%E4%B8%AD%E5%8C%BA%E6%B7%B1%E4%BA%95%E6%B2%A2%E7%94%BA307-9" target="_blank" rel="noopener"><span style="font-size:40px">📍</span><b style="color:var(--ink);font-size:16px">Googleマップで開く</b><span>大阪府堺市中区深井沢町307-9</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="dark cta" id="contact">
+  <div class="wrap">
+    <img src="logo-white.png" alt="">
+    <h2>まずはカウンセリング＋体験から。</h2>
+    <p>「はじめての方」ボタンから、スマホでかんたんにお申し込みいただけます。<br>体験トレーニング 3,300円（ペアは1名 2,200円）。体験当日のご入会で体験料は無料です。</p>
+    <div class="hero-cta">
+      <a class="btn solid" href="https://kataokadesu.github.io/komatsu-gym/?taiken">はじめての方はこちら</a>
+      <a class="btn ghost" href="https://kataokadesu.github.io/komatsu-gym/">会員の方はログイン</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© きん肉こまつ</span>
+    <span>PERSONAL TRAINING ／ OSAKA SAKAI</span>
+  </div>
+</footer>
+
+<div class="sticky-cta">
+  <a class="btn solid" href="https://kataokadesu.github.io/komatsu-gym/?taiken">はじめての方</a>
+  <a class="btn ghost" href="#price">料金</a>
+</div>
+
+<script>
+document.querySelectorAll('.ptabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.ptabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.ppanel').forEach(p=>p.hidden=p.id!=='p-'+b.dataset.p);
+}));
+</script>
+</body>
+</html>
