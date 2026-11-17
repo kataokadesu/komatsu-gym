@@ -879,9 +879,22 @@ function seedDB(){
     DB.ticket_history.push(
       {id:'th4',user_id:'u1',delta:5,memo:'回数券 5枚（現金）',by_admin:true,created_at:'2026-11-02',course:c2},
       {id:'th5',user_id:'u1',delta:-1,memo:'予約',by_admin:false,created_at:'2026-11-09',course:c2});
+    /* 時間割のあるコースは、今月と来月の時間割を入れておく（config.js の demoSchedule） */
+    let d2=dstr(1), h2=13;
+    const slots={};
+    COURSES.filter(c=>c.schedule).forEach(c=>{
+      const base=c.demoSchedule||{}, n=new Date();
+      slots[c.id]={};
+      for(let i=0;i<2;i++) slots[c.id][fmtDate(new Date(n.getFullYear(),n.getMonth()+i,1)).slice(0,7)]=Object.assign({},base);
+      if(c.id===c2){
+        const d=new Date();
+        for(let i=1;i<15;i++){ d.setDate(d.getDate()+1); const v=base[d.getDay()]; if(v!==undefined&&v!==null){ d2=fmtDate(d); h2=Number(v); break; } }
+      }
+    });
+    if(Object.keys(slots).length) DB.settings.push({id:'course_slots',slots});
     DB.reservations.push(
-      {id:'r4',user_id:'u3',date:dstr(1),hour:13,target:'',group_id:null,status:'booked',trainer_id:'admin1',created_at:'2026-11-01',store:DEMO_S1,course:c2},
-      {id:'r5',user_id:'u2',date:dstr(1),hour:13,target:'',group_id:null,status:'booked',trainer_id:'admin1',created_at:'2026-11-01',store:DEMO_S1,course:c2});
+      {id:'r4',user_id:'u3',date:d2,hour:h2,target:'',group_id:null,status:'booked',trainer_id:'admin1',created_at:'2026-11-01',store:DEMO_S1,course:c2},
+      {id:'r5',user_id:'u2',date:d2,hour:h2,target:'',group_id:null,status:'booked',trainer_id:'admin1',created_at:'2026-11-01',store:DEMO_S1,course:c2});
   }
 }
 let _idc=100;
@@ -2052,6 +2065,7 @@ async function offerOwner(){
 async function loadSettings(){
   const { data } = await sb.from('settings').select('*').eq('id',1).maybeSingle();
   if(data){ SETTINGS={openHour:data.open_hour,closeHour:data.close_hour,weekdaysOnly:SHOP_WEEKDAYS_ONLY,maxParty:data.max_party}; }
+  await loadCourseSlots();
 }
 
 /* ---------- タブ ---------- */
@@ -2358,7 +2372,7 @@ function monthCal(days, note){
 }
 /* 月を切り替えて、その月で最初に予約できる日を選ぶ */
 function calMove(step){
-  const days=nextDays(BOOK_AHEAD_DAYS).map(fmtDate);
+  const days=courseDays(curCourse).map(fmtDate);
   const months=[...new Set(days.map(ds=>ds.slice(0,7)))];
   const next=months[months.indexOf(selDate.slice(0,7))+step];
   if(!next) return;
@@ -2460,11 +2474,13 @@ async function linkAccount(){
 async function memberReserveView(){
   /* 初回体験と、担当を選ばない店舗は、指名なしの空き枠だけを出す */
   if(!MEMBER_PICKS_TRAINER || trialAvailable()) selTrainer=null;
-  let days=nextDays(BOOK_AHEAD_DAYS);
+  let days=courseDays(curCourse);
   /* 今日の枠がすべて終わっていたら、今日は選べないようにする */
-  if(days.length>1 && slotHours().every(h=>isPastSlot(fmtDate(days[0]),h))) days=days.slice(1);
-  if(!selDate)selDate=fmtDate(days[0]);
+  if(!isSchedCourse(curCourse) && days.length>1 && slotHours().every(h=>isPastSlot(fmtDate(days[0]),h))) days=days.slice(1);
   const todayS=fmtDate(new Date());
+  /* 時間割のあるコースは選べる日が違うので、選んでいた日が無ければ最初の日に合わせる */
+  if(!days.length) selDate=selDate||todayS;
+  else if(!selDate || (USE_SCHED && !days.some(d=>fmtDate(d)===selDate))) selDate=fmtDate(days[0]);
   /* 必要なものは同時に読む */
   const [myGroups,{ data:resv },blocks,{ data:own },{ data:joined }] = await Promise.all([
     USE_GROUPS?getMyGroupIds():Promise.resolve([]),
@@ -2498,12 +2514,13 @@ async function memberReserveView(){
     </div>`:''}
     <div class="card">
       <h2>日付を選ぶ</h2>
-      ${monthCal(days, `ご予約は ${jdate(fmtDate(days[days.length-1]))} まで受け付けています`)}
+      ${days.length?monthCal(days, `ご予約は ${jdate(fmtDate(days[days.length-1]))} まで受け付けています`)
+        :`<div class="empty">${esc(courseName(curCourse))}の日程は、まだ決まっていません。<br>決まりしだい、ここからご予約いただけます。</div>`}
     ${(!MEMBER_PICKS_TRAINER||trialAvailable())?'':`<h2 style="margin-top:6px">担当を選ぶ</h2>
     <div class="chips" id="trainerChips">${trainerChips(selTrainer,trainersOffAllDay(blocks,selDate))}</div>`}
-    <h2 style="margin-top:14px">時間を選ぶ</h2>
+    ${days.length?'<h2 style="margin-top:14px">時間を選ぶ</h2>':''}
     <div class="slots">`;
-  slotHours().forEach(h=>{
+  (days.length?courseHours(curCourse,selDate):[]).forEach(h=>{
     const rs=byHour[h]||[];
     const past=isPastSlot(selDate,h);
     /* コースを使う店舗。別のコースの予約が入った時間は取れない。クラス形式は定員まで受け付ける */
@@ -2515,6 +2532,8 @@ async function memberReserveView(){
         html+=cell('mine','予約済み'+(courseIdOf(mineC)!==curCourse?'<br>'+esc(courseName(courseIdOf(mineC))):'')); return;
       }
       if(!mineC && !past && !blockedFor(blocks,h,selTrainer) && rs.length>here.length){ html+=cell('taken','予約あり'); return; }
+      /* ほかのコースの時間割の枠は、そのコースのためにあけておく */
+      if(!mineC && !past && heldByOther(curCourse,selDate,h)){ html+=cell('taken',esc(holderOf(curCourse,selDate,h).name)+'<br>の時間'); return; }
       if(!mineC && isClassCourse(curCourse)){
         if(past){ html+=cell('taken','受付終了'); return; }
         if(allBlocked(blocks,h)){ html+=cell('taken',blockedAll(blocks,h)?'お休み':'予約不可'); return; }
@@ -2635,6 +2654,140 @@ function slotOpen(rs,trainerId,excludeId,blocked,cid){
   return slotFree(list,trainerId,null,blocked);
 }
 
+/* ---------- コースの時間割 ----------
+   config.js の courses で schedule: true にしたコースは、トレーナーが決めた時間だけ予約できる。
+   時間割は「月ごと・曜日ごとに1つの時間」。settings の course_slots に
+   { slots: { コースid: { "2026-11": { 0:11, 1:21, …（0=日曜）} } } } の形で持つ。
+   時間割が無い月は、会員は予約できない。トレーナーは時間割に無い時間にも予約を入れられる */
+const USE_SCHED = USE_COURSES && COURSES.some(c=>c.schedule);
+let COURSE_SLOTS = {};
+function isSchedCourse(id){ const c=courseOf(id); return USE_COURSES && !!(c && c.schedule); }
+function schedMonth(id,ym){ return (COURSE_SLOTS[id]||{})[ym] || null; }
+function dowOf(ds){ const [y,m,d]=String(ds).split('-').map(Number); return new Date(y,m-1,d).getDay(); }
+/* その日の、時間割で決まっている時間 */
+function schedHours(id,ds){
+  const m=schedMonth(id,String(ds).slice(0,7)); if(!m) return [];
+  const v=m[dowOf(ds)];
+  return (v===undefined||v===null||v==='') ? [] : [Number(v)];
+}
+/* 会員がそのコースで選べる時間 */
+function courseHours(id,ds){ return isSchedCourse(id) ? schedHours(id,ds) : slotHours(); }
+/* その時間が、ほかのコースの時間割の枠と重なっているか（重なる時間は、そのコースのためにあけておく） */
+function holderOf(cid,ds,h){
+  if(!USE_SCHED) return null;
+  return COURSES.find(c=>c.id!==cid && isSchedCourse(c.id) && schedHours(c.id,ds).some(s=>h<s+1 && s<h+STEP_H)) || null;
+}
+function heldByOther(cid,ds,h){ return !!holderOf(cid,ds,Number(h)); }
+/* 会員がその時間を予約してよいか */
+function memberSlotOk(cid,ds,h){
+  return isSchedCourse(cid) ? schedHours(cid,ds).includes(Number(h)) : !heldByOther(cid,ds,h);
+}
+/* 今日から n 日先までのすべての日 */
+function allDays(n){
+  const out=[];const d=new Date();d.setHours(0,0,0,0);
+  for(let i=0;i<n;i++){ out.push(new Date(d)); d.setDate(d.getDate()+1); }
+  return out;
+}
+/* 会員がそのコースで選べる日 */
+function courseDays(id){
+  if(!isSchedCourse(id)) return nextDays(BOOK_AHEAD_DAYS);
+  return allDays(BOOK_AHEAD_DAYS).filter(d=>{ const ds=fmtDate(d); return schedHours(id,ds).some(h=>!isPastSlot(ds,h)); });
+}
+/* その日に予約がありうる時間（営業時間と、時間割の枠を合わせたもの）。お休みの設定で使う */
+function dayHours(ds){
+  if(!USE_SCHED) return slotHours();
+  const [y,m,d]=String(ds).split('-').map(Number);
+  const open=!SETTINGS.weekdaysOnly || isWeekday(new Date(y,m-1,d));
+  const set=new Set(open?slotHours():[]);
+  COURSES.forEach(c=>{ if(isSchedCourse(c.id)) schedHours(c.id,ds).forEach(h=>set.add(h)); });
+  const a=[...set].sort((a,b)=>a-b);
+  return a.length ? a : slotHours();
+}
+function blkHours(blocks){ const ds=blocks&&blocks[0]&&blocks[0].date; return ds ? dayHours(ds) : slotHours(); }
+/* トレーナーが予約を入れるときに選べる時間（営業時間＋そのコースの時間割の枠） */
+function adminHours(cid,ds){
+  return [...new Set([...slotHours(),...schedHours(cid,ds)])].sort((a,b)=>a-b);
+}
+async function loadCourseSlots(){
+  if(!USE_SCHED) return;
+  try{
+    const { data } = await sb.from('settings').select('*').eq('id','course_slots').maybeSingle();
+    COURSE_SLOTS=(data&&data.slots)||{};
+  }catch(e){ console.warn(e); }
+}
+/* トレーナーの予約状況に出す、その日のクラスの枠 */
+function schedLine(ds,resv){
+  if(!USE_SCHED) return '';
+  return COURSES.filter(c=>isSchedCourse(c.id) && (calCourse==='all'||calCourse===c.id)).map(c=>
+    schedHours(c.id,ds).map(h=>{
+      const n=(resv||[]).filter(r=>courseIdOf(r)===c.id && Number(r.hour)===h).reduce((a,r)=>a+partyOf(r),0);
+      return `<div class="small" style="margin:2px 0 8px;font-weight:700">${esc(c.name)}のクラス　${hhmm(h)}〜　予約 ${n}/${courseCap(c.id)}名</div>`;
+    }).join('')).join('');
+}
+/* 設定画面の時間割 */
+let schedYM='';
+function ymShift(ym,step){ const [y,m]=ym.split('-').map(Number); return fmtDate(new Date(y,m-1+step,1)).slice(0,7); }
+function schedHourOptions(sel){
+  const none=(sel===undefined||sel===null||sel==='');
+  let o=`<option value="" ${none?'selected':''}>なし</option>`;
+  for(let h=5;h<=23;h+=STEP_H){
+    const v=Math.round(h*100)/100;
+    o+=`<option value="${v}" ${!none&&Number(sel)===v?'selected':''}>${hhmm(v)}〜</option>`;
+  }
+  return o;
+}
+function schedCards(){
+  if(!USE_SCHED) return '';
+  const nowYM=fmtDate(new Date()).slice(0,7);
+  if(!schedYM) schedYM=nowYM;
+  const [y,m]=schedYM.split('-').map(Number);
+  return COURSES.filter(c=>c.schedule).map(c=>{
+    const cur=schedMonth(c.id,schedYM);
+    return `<div class="card" style="margin-top:16px"><h2>${esc(c.name)}の時間割</h2>
+      <p class="small" style="margin-bottom:10px;line-height:1.7">曜日ごとに、クラスを開く時間を決めます。月ごとに変えられます。<br>会員は、ここで決めた時間だけ予約できます。</p>
+      <div class="mcal-head">
+        <button onclick="schedMove(-1)" ${schedYM<=nowYM?'disabled':''} aria-label="前の月">‹</button>
+        <b>${y}年${m}月</b>
+        <button onclick="schedMove(1)" aria-label="次の月">›</button>
+      </div>
+      <div class="small" style="margin:8px 0 4px;font-weight:700;line-height:1.7;${cur?'':'color:var(--danger)'}">${cur?'この月の時間割は保存されています。':'この月の時間割は、まだ決まっていません。<br>保存するまで、会員はこの月を予約できません。'}</div>
+      ${DOW.map((w,i)=>`<div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+        <div class="${dowClass(i)}" style="width:3.2em;font-weight:700;flex:none">${w}曜</div>
+        <select id="sch_${c.id}_${i}" style="flex:1;min-width:0">${schedHourOptions(cur?cur[i]:'')}</select></div>`).join('')}
+      <div style="height:14px"></div>
+      <button class="btn" onclick="saveSched('${c.id}')">${m}月の時間割を保存する</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="copySched('${c.id}')">前の月と同じ内容を入れる</button>
+      <div class="small" style="margin-top:10px;line-height:1.7">休む日は、予約状況の「お休みの設定」でその日だけ止められます。<br>すでに入っている予約は、時間割を変えてもそのまま残ります。</div>
+    </div>`;
+  }).join('');
+}
+function schedMove(step){ schedYM=ymShift(schedYM,step); render(); }
+function copySched(cid){
+  const prev=schedMonth(cid,ymShift(schedYM,-1));
+  if(!prev){ toast('前の月の時間割がありません'); return; }
+  for(let i=0;i<7;i++){
+    const el=document.getElementById(`sch_${cid}_${i}`);
+    if(el) el.value=(prev[i]===undefined||prev[i]===null||prev[i]==='')?'':String(Number(prev[i]));
+  }
+  toast('前の月の内容を入れました。保存を押してください');
+}
+async function saveSched(cid){
+  const m={}; let n=0;
+  for(let i=0;i<7;i++){
+    const el=document.getElementById(`sch_${cid}_${i}`); const v=el?el.value:'';
+    m[i]=(v==='')?null:Number(v); if(v!=='') n++;
+  }
+  if(!n && !(await askConfirm('すべての曜日が「なし」です。この月は会員が予約できなくなります。よろしいですか？','保存する'))) return;
+  /* ほかの端末で保存された分を消さないよう、読み直してから書く */
+  await loadCourseSlots();
+  const all=JSON.parse(JSON.stringify(COURSE_SLOTS||{}));
+  (all[cid]=all[cid]||{})[schedYM]=m;
+  const res=await sb.from('settings').upsert({id:'course_slots',slots:all,updated_at:new Date().toISOString()});
+  if(res&&res.error){ toast('保存できませんでした。もう一度お試しください'); return; }
+  COURSE_SLOTS=all;
+  toast('時間割を保存しました'); render();
+}
+
 /* ---------- 店舗 ----------
    config.js の stores に2つ以上書くと、店舗ごとに予約枠を分けて管理する。
    予約・トレーナー・会員・お休みには store（店舗の id）を持たせる。
@@ -2731,9 +2884,9 @@ function blockedAll(blocks,h){ return blocksAt(blocks,h).some(b=>!b.trainer_id);
 /* その時間にとまっている担当の一覧 */
 function blockedIds(blocks,h){ return new Set(blocksAt(blocks,h).map(b=>b.trainer_id).filter(Boolean)); }
 /* その日の営業時間がすべてお店の休みか */
-function storeClosedAllDay(blocks){ return slotHours().every(h=>blockedAll(blocks,h)); }
+function storeClosedAllDay(blocks){ return blkHours(blocks).every(h=>blockedAll(blocks,h)); }
 /* その担当が、自分の休みとして1日すべて休みにしているか */
-function trainerOffAllDayOnly(blocks,tid){ return slotHours().every(h=>blockedIds(blocks,h).has(tid)); }
+function trainerOffAllDayOnly(blocks,tid){ return blkHours(blocks).every(h=>blockedIds(blocks,h).has(tid)); }
 /* 1日まとめての休みに付けたメモ（最初に見つかったもの） */
 function dayMemo(blocks,tid){ const b=(blocks||[]).find(x=>(x.trainer_id||null)===(tid||null)&&x.memo); return b?b.memo:''; }
 /* 会員がその枠を予約できないか（お店の休み、または選んだ担当が休み） */
@@ -2922,6 +3075,10 @@ async function submitReserve(date,hour){
 /* 予約を書き込む。空き・とめた枠をもう一度確かめてから登録する */
 async function finalizeReserve(p){
   if(isPastSlot(p.date,p.hour)){ toast('この時間の受付は終了しました'); closeOv(); render(); return false; }
+  /* 会員は、時間割で決まった時間だけ（ほかのコースの枠も取れない）。トレーナーの登録は自由 */
+  if(!p.proxy && USE_SCHED && !memberSlotOk(p.course,p.date,p.hour)){
+    toast('この時間は予約を受け付けていません'); closeOv(); render(); return false;
+  }
   const blocks=inStore(await loadBlocks(p.date));
   if(!p.proxy && blockedFor(blocks,p.hour,p.trainerId)){
     toast('この時間は予約を受け付けていません'); closeOv(); render(); return false;
@@ -2973,7 +3130,9 @@ async function openMove(id){
   const isAdmin=profile.role==='admin';
   if(!isAdmin && r.user_id!==me.id){toast('この予約は変更できません');return;}
   if(!isAdmin && pastDeadline(r)){toast(`${LATE_REASON}、変更できません。トレーナーにご連絡ください`);return;}
-  const days=nextDays(BOOK_AHEAD_DAYS).map(fmtDate);
+  const mcid=courseIdOf(r);
+  const days=(isSchedCourse(mcid) ? (isAdmin?allDays(BOOK_AHEAD_DAYS):courseDays(mcid)) : nextDays(BOOK_AHEAD_DAYS)).map(fmtDate);
+  if(!days.length){ toast('変更できる日がありません'); return; }
   mv={id,r,date:days.includes(r.date)?r.date:days[0]};
   const opts=days.map(ds=>`<option value="${ds}" ${ds===mv.date?'selected':''}>${jdate(ds)}</option>`).join('');
   document.getElementById('ovBody').innerHTML=`
@@ -3000,9 +3159,12 @@ async function mvRenderSlots(){
   const byHour={};inStore(resv).forEach(r=>(byHour[r.hour]=byHour[r.hour]||[]).push(r));
   const isAdmin=profile.role==='admin';
   const blocks=inStore(await loadBlocks(mv.date));
-  el.innerHTML=slotHours().map(h=>{
+  const mcid=courseIdOf(mv.r);
+  const hours=isSchedCourse(mcid) ? (isAdmin?adminHours(mcid,mv.date):schedHours(mcid,mv.date)) : slotHours();
+  el.innerHTML=hours.map(h=>{
     const cur=(mv.date===mv.r.date && h===mv.r.hour);
     const blocked=blockedFor(blocks,h,tid);
+    if(!isAdmin && !cur && heldByOther(mcid,mv.date,h)) return `<div class="slot taken"><div class="t">${hhmm(h)}</div><div class="s">予約不可</div></div>`;
     if(blocked && !isAdmin && !cur) return `<div class="slot taken"><div class="t">${hhmm(h)}</div><div class="s">${blockedAll(blocks,h)?'お休み':'予約不可'}</div></div>`;
     const free=slotOpen(byHour[h]||[],tid,mv.id,isAdmin?new Set():blockedIds(blocks,h),courseIdOf(mv.r));
     /* 同じ枠でも担当だけ変えることはできる */
@@ -3011,10 +3173,13 @@ async function mvRenderSlots(){
     if(!free) return `<div class="slot taken"><div class="t">${hhmm(h)}</div><div class="s">予約あり</div></div>`;
     if(isPastSlot(mv.date,h)) return `<div class="slot taken"><div class="t">${hhmm(h)}</div><div class="s">受付終了</div></div>`;
     return `<div class="slot open" onclick="submitMove(${h})"><div class="t">${hhmm(h)}</div><div class="s">空き</div></div>`;
-  }).join('');
+  }).join('') || '<div class="small">この日は、選べる時間がありません。</div>';
 }
 async function submitMove(h){
   if(isPastSlot(mv.date,h)){toast('この時間の受付は終了しました');mvRenderSlots();return;}
+  if(profile.role!=='admin' && USE_SCHED && !memberSlotOk(courseIdOf(mv.r),mv.date,h)){
+    toast('この時間は予約を受け付けていません');mvRenderSlots();return;
+  }
   const tid=mvTid();
   if(profile.role!=='admin' && blockedFor(inStore(await loadBlocks(mv.date)),h,tid)){
     toast('この時間は予約を受け付けていません');mvRenderSlots();return;
@@ -3929,7 +4094,7 @@ async function adminReserveView(){
   const holLine=holidayLine(blocks);
   html+=`<div class="card tt-day"><div class="tt-day-head"><h2>${jdate(selDate)} の予約　<span class="pill">${day.length}件</span></h2>
     <button class="btn sm ghost row" onclick="openHoliday('${selDate}')">お休みの設定</button></div>
-    ${holLine?`<div class="hol-line">${holLine}</div>`:''}`;
+    ${holLine?`<div class="hol-line">${holLine}</div>`:''}${schedLine(selDate,resv)}`;
   if(!day.length) html+=`<div class="empty">${selDate<todayS?'この日の予約はありませんでした':'この日の予約はまだありません'}</div>`;
   /* 件数が多い日は、枠の中だけでスクロールする */
   const manyDay=day.length>TT_VISIBLE;
@@ -3949,14 +4114,14 @@ async function adminReserveView(){
   if(manyDay) html+=`</div>`;
   html+=`</div>`;
 
-  const canAdd=selDate>=todayS && !slotHours().every(h=>isPastSlot(selDate,h));
+  const canAdd=selDate>=todayS && !dayHours(selDate).every(h=>isPastSlot(selDate,h));
   html+=`<div class="tt-add ${canAdd?'':'off'}" onclick="openAdminNew('${selDate}')" title="予約を入れる">＋</div>`;
   document.getElementById('screen').innerHTML=html;
 }
 /* 選んだ日の休みを1行で（カードの見出しの下に出す） */
 function holidayLine(blocks){
   if(!blocks||!blocks.length) return '';
-  const all=slotHours();
+  const all=blkHours(blocks);
   /* 続いた時間はまとめる（10,11,12 → 10:00〜13:00） */
   const span=hs=>{
     hs=[...new Set(hs)].sort((a,b)=>a-b);
@@ -3994,7 +4159,7 @@ async function openHoliday(date){
     ...(storeOff?[{tid:null,label:'お店の休み',memo:dayMemo(blocks,null)}]:[]),
     ...offTrainers.map(t=>({tid:t.id,label:t.name+'の休み',memo:dayMemo(blocks,t.id)}))
   ];
-  const slots=slotHours().map(h=>{
+  const slots=dayHours(date).map(h=>{
     const bs=blocksAt(blocks,h);
     const all=bs.some(b=>!b.trainer_id);
     const names=bs.filter(b=>b.trainer_id).map(b=>trainerName(b.trainer_id).replace(/トレーナー$/,''));
@@ -4107,7 +4272,7 @@ async function addDayBlock(date){
   const blocks=inStore(await loadBlocks(date));
   for(const tid of who){
     const memo=typed||(tid?'お休み':'臨時休業');
-    const rows=slotHours()
+    const rows=dayHours(date)
       .filter(h=>!blocksAt(blocks,h).some(b=>(b.trainer_id||null)===tid))
       .map(h=>({date,hour:h,trainer_id:tid,memo,by:me.id,store:curStore}));
     for(const r of rows) await sb.from('blocks').insert(r);
@@ -4150,19 +4315,21 @@ async function openResDetail(id){
 async function openAdminNew(date){
   const { data:resv } = await sb.from('reservations').select('*').eq('date',date);
   const byHour={};inStore(resv).forEach(r=>(byHour[r.hour]=byHour[r.hour]||[]).push(r));
-  const slots=slotHours().map(h=>{
+  const sched=isSchedCourse(curCourse);
+  const slots=(sched?adminHours(curCourse,date):slotHours()).map(h=>{
     const past=isPastSlot(date,h), free=slotOpen(byHour[h]||[],null,null,null,curCourse);
+    const mark=(sched && schedHours(curCourse,date).includes(h))?'時間割の枠<br>':'';
     if(past) return `<div class="slot taken"><div class="t">${hhmm(h)}</div><div class="s">受付終了</div></div>`;
     if(!free) return `<div class="slot taken"><div class="t">${hhmm(h)}</div><div class="s">満枠</div></div>`;
     const n=(byHour[h]||[]).length;
-    return `<div class="slot open" onclick="adminPickMember('${date}',${h})"><div class="t">${hhmm(h)}</div><div class="s">${n?`空きあり（${n}件）`:'空き'}</div></div>`;
+    return `<div class="slot open" onclick="adminPickMember('${date}',${h})"><div class="t">${hhmm(h)}</div><div class="s">${mark}${n?`空きあり（${n}件）`:'空き'}</div></div>`;
   }).join('');
   document.getElementById('ovBody').innerHTML=`
     <h3>予約を入れる</h3>
     <div class="sub">${jdate(date)}　時間を選んでください</div>
     ${USE_COURSES?`<div class="chips bigchips" style="margin:0 0 12px">${courseChips(curCourse,'pickNewCourse')}</div>`:''}
     <div class="slots">${slots}</div>
-    <p class="small" style="margin-top:8px">電話や店頭で受けた予約を登録します。次の画面で会員を選びます。</p>
+    <p class="small" style="margin-top:8px">電話や店頭で受けた予約を登録します。次の画面で会員を選びます。${sched?'<br>時間割にない時間にも、ここからは予約を入れられます。':''}</p>
     <button class="btn ghost" style="margin-top:12px" onclick="closeOv()">やめる</button>`;
   openOv();
 }
@@ -4837,6 +5004,7 @@ async function adminSettingsView(){
       <div style="height:10px"></div>
       <button class="btn" onclick="saveSettings()">保存する</button>
     </div>
+    ${schedCards()}
     ${(owner||!STAFF_SIGNUP)?'':`<div class="card" style="margin-top:16px"><h2>スタッフの合言葉</h2>
       <div class="small" style="line-height:1.7">合言葉は、オーナー${OWNER_UID?`（${esc(trainerName(OWNER_UID))}）`:''}だけが確認・変更できます。<br>トレーナーを増やすときは、オーナーに合言葉を聞いてください。</div>
     </div>`}
