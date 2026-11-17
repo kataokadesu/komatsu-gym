@@ -82,9 +82,12 @@
   @media(max-width:860px){.features{grid-template-columns:1fr}}
 
   /* 目的 */
-  .goals{display:flex;flex-wrap:wrap;gap:10px}
-  .goal{border:1.5px solid var(--paper);border-radius:40px;padding:10px 20px;font-weight:700;font-size:15px}
+  .goal-label{font-size:12px;font-weight:700;letter-spacing:.2em;color:rgba(255,255,255,.6);margin:0 0 10px}
+  .goal-label.part{margin-top:24px}
+  .goals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .goal{display:flex;align-items:center;justify-content:center;text-align:center;min-height:52px;border:1.5px solid var(--paper);border-radius:10px;padding:10px 8px;font-weight:700;font-size:15px;line-height:1.35}
   .goal.fill{background:var(--paper);color:var(--ink)}
+  @media (max-width:640px){.goals{grid-template-columns:repeat(2,1fr);gap:8px}.goal{font-size:14px;min-height:48px}}
   .dark-note{margin-top:26px;color:#d4d4d8;font-size:14px;max-width:40em}
 
   /* 料金 */
@@ -270,18 +273,23 @@
       <div class="en">YOUR GOAL</div>
       <h2>目的に合わせて、何でもご相談ください。</h2>
     </div>
+    <p class="goal-label">目的</p>
     <div class="goals">
       <span class="goal fill">ダイエット</span>
       <span class="goal fill">ボディメイク</span>
       <span class="goal fill">体力づくり</span>
       <span class="goal fill">筋力向上</span>
-      <span class="goal fill">ボディメイク大会出場</span>
+      <span class="goal fill">ボディメイク<br>大会出場</span>
       <span class="goal fill">HYROX出場</span>
+    </div>
+    <p class="goal-label part">気になる部位</p>
+    <div class="goals">
       <span class="goal">姿勢改善</span>
       <span class="goal">お尻・ふともも</span>
       <span class="goal">ウエスト</span>
       <span class="goal">二の腕</span>
       <span class="goal">背中</span>
+      <span class="goal">肩・胸</span>
     </div>
     <p class="dark-note">全身はもちろん、肩・胸・ウエスト・お尻・ふともも・背中・二の腕など、部位を絞ったトレーニングも可能です。運動経験は問いません。</p>
   </div>
