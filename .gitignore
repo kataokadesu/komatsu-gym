@@ -1,0 +1,10 @@
+.DS_Store
+.claude/settings.local.json
+.firebase/
+
+# Cloudflare Workers（mail-worker）の作業ファイル
+.wrangler/
+.dev.vars
+
+# 先行店舗の設定の実物と資料。公開リポジトリには入れない（手元にだけ置く）
+見本/

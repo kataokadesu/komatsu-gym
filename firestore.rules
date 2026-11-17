@@ -1,0 +1,233 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    // 権限と契約書の同意日は変わっていないか
+    function sameRoleAndTerms() {
+      return request.resource.data.role == resource.data.role
+        && request.resource.data.get('terms_agreed_at', null) == resource.data.get('terms_agreed_at', null);
+    }
+    // チケットが増えていないか（tickets2 は、コースを使う店舗の2つ目のコースのチケット）
+    function ticketsNotUp() {
+      return request.resource.data.get('tickets', 0) <= resource.data.get('tickets', 0)
+        && request.resource.data.get('tickets2', 0) <= resource.data.get('tickets2', 0);
+    }
+    // 予約の開始時刻（日本時間の date + hour を世界時に直す）
+    function startsAtUtc(d, h) {
+      // hour は 10.5 = 10:30 の形もあるので、分に直して足す
+      return timestamp.date(int(d.split('-')[0]), int(d.split('-')[1]), int(d.split('-')[2]))
+        + duration.value(int((h - 9) * 60), 'm');
+    }
+    // 取消・変更の締め切り前か。時間は config.js の cancelHours と同じにする
+    function beforeDeadline(d, h) {
+      return request.time < startsAtUtc(d, h) - duration.value(24, 'h');
+    }
+    // 取り消しの返却か。rid の予約が自分のもので、この書き込みと同時に消えていて、
+    // 戻す枚数がその予約で使った分に収まっているときだけ許す
+    function refundOf(rid) {
+      return rid is string && rid != ''
+        && exists(/databases/$(database)/documents/reservations/$(rid))
+        && !existsAfter(/databases/$(database)/documents/reservations/$(rid))
+        && get(/databases/$(database)/documents/reservations/$(rid)).data.user_id == request.auth.uid
+        && beforeDeadline(get(/databases/$(database)/documents/reservations/$(rid)).data.date,
+                          get(/databases/$(database)/documents/reservations/$(rid)).data.hour)
+        // 戻す先は、その予約のコースのチケットだけ（course が無い予約は1つ目のコース）
+        && ((get(/databases/$(database)/documents/reservations/$(rid)).data.get('course', '') == ''
+             && request.resource.data.get('tickets2', 0) <= resource.data.get('tickets2', 0)
+             && request.resource.data.get('tickets', 0) <=
+                resource.data.get('tickets', 0) + get(/databases/$(database)/documents/reservations/$(rid)).data.get('tickets_used', 1))
+         || (get(/databases/$(database)/documents/reservations/$(rid)).data.get('course', '') != ''
+             && request.resource.data.get('tickets', 0) <= resource.data.get('tickets', 0)
+             && request.resource.data.get('tickets2', 0) <=
+                resource.data.get('tickets2', 0) + get(/databases/$(database)/documents/reservations/$(rid)).data.get('tickets_used', 1)));
+    }
+    // オーナー（最初に登録したトレーナー）。settings/bootstrap の owner_uid に記録する
+    function ownerUid() {
+      return exists(/databases/$(database)/documents/settings/bootstrap)
+        ? get(/databases/$(database)/documents/settings/bootstrap).data.get('owner_uid', '')
+        : '';
+    }
+    function isOwner() {
+      return signedIn() && ownerUid() == request.auth.uid;
+    }
+    // トレーナーがまだ1人もいない（開店直後）。ゲスト（匿名ログイン）は対象外
+    function canBeFirstTrainer() {
+      return !exists(/databases/$(database)/documents/settings/bootstrap)
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    // 会員プロフィール（ドキュメントID = Auth UID）
+    // 予約画面で他会員の名前を表示するため、読み取りはログイン済み全員に許可。
+    // 書き換えは「自分の分」か「トレーナー」だけ。
+    // チケットは、増やせるのはトレーナーだけ。会員は
+    //   ・予約のときに減らす
+    //   ・取り消しのときに、その予約が消えるのと同時に、使った分だけ戻す
+    // しかできない（同じ予約で二度は戻せない）。
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      // 自分のプロフィールは会員として作れる。トレーナー（admin）で作れるのは
+      //   1人目（settings/bootstrap がまだ無い＝開店直後）か、
+      //   スタッフの合言葉（settings/staff の code）が合っている場合だけ
+      allow create: if isAdmin()
+        || (isSelf(uid) && request.resource.data.role != 'admin')
+        || (isSelf(uid) && request.resource.data.role == 'admin' && canBeFirstTrainer())
+        || (isSelf(uid) && request.resource.data.role == 'admin'
+            && request.resource.data.get('staff_code', '') != ''
+            && request.resource.data.get('staff_code', '') ==
+               get(/databases/$(database)/documents/settings/staff).data.get('code', ''));
+      // トレーナーは会員の情報を直せる。ただし権限（role）は変えられない。
+      // 権限を変えられるのはオーナーだけで、できるのは「トレーナーを会員に戻す」だけ。
+      // 会員をトレーナーに上げることはできない（新しいトレーナーはスタッフの合言葉で登録する）
+      allow update: if (isAdmin() && request.resource.data.role == resource.data.role)
+        || (isOwner() && uid != ownerUid() && request.resource.data.role != 'admin')
+        // 先に会員として登録したオーナーが、トレーナーがまだいないうちに自分をトレーナーにする
+        || (isSelf(uid) && request.resource.data.role == 'admin' && canBeFirstTrainer()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']))
+        // 自分のプロフィール。権限と契約書の同意日は変えられない。チケットは減らすだけ
+        || (isSelf(uid) && sameRoleAndTerms() && ticketsNotUp())
+        // ゲストのまま使っていた方が、あとからログインできるようにするとき。
+        // 契約書の同意日は、まだ無いときだけ入れられる（書き換えはできない）
+        || (isSelf(uid) && request.resource.data.role == resource.data.role
+            && resource.data.get('terms_agreed_at', null) == null
+            && ticketsNotUp())
+        // 取り消しの返却。予約が同時に消えるときだけ、その予約で使った分まで戻せる
+        || (isSelf(uid) && sameRoleAndTerms() && refundOf(request.resource.data.get('refund_res', '')));
+      allow delete: if false;
+    }
+
+    // 営業時間などの設定（ドキュメントID固定 "1"）
+    // "staff"（スタッフの合言葉）は、オーナーだけが読み書きできる
+    // "bootstrap"（トレーナー登録済みの印とオーナー）は、作るときに自分をオーナーにする。
+    //   オーナー未記録の店舗では、トレーナーが一度だけ自分をオーナーとして記録できる
+    match /settings/{id} {
+      // settings/ai は姿勢分析の AI キー。トレーナーだけが読める
+      allow read: if (id == 'staff' && isOwner())
+        || (id == 'ai' && isAdmin())
+        || (id != 'staff' && id != 'ai' && signedIn());
+      allow create: if isAdmin()
+        && (id != 'staff' || isOwner())
+        && (id != 'bootstrap' || request.resource.data.get('owner_uid', '') == request.auth.uid);
+      allow update: if (id == 'staff' && isOwner())
+        || (id == 'bootstrap' && (isOwner()
+            || (isAdmin() && resource.data.get('owner_uid', '') == ''
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['owner_uid'])
+                && request.resource.data.owner_uid == request.auth.uid)))
+        || (id != 'staff' && id != 'bootstrap' && isAdmin());
+      allow delete: if isOwner() && id != 'bootstrap';
+    }
+
+    // 会員写真（SHOP.photoStore が "firestore" の店舗）。
+    // トレーナーはすべて見られる。会員は自分の写真だけ見られ、靴と顔だけ自分で入れられる
+    // レッスン記録。レッスンでやったメニューをトレーナーが書き残す。
+    // お店側の記録なので、お客様には見せない
+    match /lesson_notes/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // 姿勢分析の記録（計測値と AI コメント）。トレーナーだけが読み書きする。
+    // user_id が null のものは、まだ会員と紐付いていない記録
+    match /posture_records/{id} {
+      allow read, write: if isAdmin();
+    }
+    // 姿勢分析の写真。記録と同じ ID で別に置いている（一覧で写真まで読まないため）
+    match /posture_photos/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    match /member_photos/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
+      allow create, update: if isAdmin()
+        || (signedIn() && request.resource.data.user_id == request.auth.uid
+            && request.resource.data.name in ['shoes.jpg', 'face.jpg']
+            // 置き場所も自分のものに限る（他人の写真を上書きできないように）
+            && id == request.auth.uid + '__' + request.resource.data.name);
+      allow delete: if isAdmin();
+    }
+
+    // 予約をとめた枠（ブロック）。作成・解除はトレーナーのみ
+    match /blocks/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // 予約
+    match /reservations/{id} {
+      allow read: if signedIn();
+      // 本人の予約か、管理者（トレーナー）による代理予約
+      allow create: if signedIn()
+        && (request.resource.data.user_id == request.auth.uid || isAdmin());
+      allow delete: if isAdmin() || resource.data.user_id == request.auth.uid;
+      // 管理者は自由に更新できる。予約した本人は次のどちらかだけ:
+      //  ・人数・お連れ様の名前・使ったチケット数（マイ予約の人数変更）
+      //  ・日付と時刻と担当（マイ予約の日時変更。当日不可はアプリ側の制限）
+      allow update: if isAdmin()
+        || (resource.data.user_id == request.auth.uid
+            && (request.resource.data.diff(resource.data).affectedKeys()
+                  .hasOnly(['party', 'guests', 'tickets_used'])
+                // 日時の変更は、変更前も変更後も締め切り前のときだけ
+                || (request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['date', 'hour', 'trainer_id'])
+                    && beforeDeadline(resource.data.date, resource.data.hour)
+                    && beforeDeadline(request.resource.data.date, request.resource.data.hour))));
+    }
+
+    // 相乗り参加者
+    match /reservation_participants/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.user_id == request.auth.uid;
+      // 本人・予約オーナー（枠ごと取消）・管理者が削除できる
+      allow delete: if isAdmin()
+        || resource.data.user_id == request.auth.uid
+        || get(/databases/$(database)/documents/reservations/$(resource.data.reservation_id)).data.user_id == request.auth.uid;
+      allow update: if false;
+    }
+
+    // グループ
+    match /groups/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.owner_id == request.auth.uid;
+      allow update: if isAdmin();
+      // 作成した人は自分のグループを削除できる
+      allow delete: if isAdmin() || resource.data.owner_id == request.auth.uid;
+    }
+    match /group_members/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.user_id == request.auth.uid;
+      // 本人・グループを作った人（グループ削除）・管理者が削除できる
+      allow delete: if isAdmin()
+        || resource.data.user_id == request.auth.uid
+        || get(/databases/$(database)/documents/groups/$(resource.data.group_id)).data.owner_id == request.auth.uid;
+      allow update: if false;
+    }
+
+    // チケット履歴（本人と管理者のみ閲覧可）
+    match /ticket_history/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
+      allow create: if (isAdmin() || (signedIn() && request.resource.data.user_id == request.auth.uid))
+        && (request.resource.data.get('by_admin', false) == false || isAdmin());
+      allow update, delete: if false;
+    }
+
+    // ヒアリングシート（連絡先を含む個人情報。本人とトレーナーだけ）
+    // 置き場所（ドキュメントID）が自分の ID のものに限る。他人の分は読めも書けもしない
+    match /intake_sheets/{uid} {
+      // 自分のシートは「置き場所が自分」でも「user_id が自分」でも読める。
+      // アプリは user_id で探すので、両方を許しておく（どちらも自分の分だけ）
+      allow read: if isAdmin() || isSelf(uid)
+        || (signedIn() && resource.data.user_id == request.auth.uid);
+      allow write: if isAdmin()
+        || (isSelf(uid) && request.resource.data.get('user_id', uid) == uid);
+    }
+  }
+}

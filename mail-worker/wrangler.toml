@@ -1,0 +1,26 @@
+# 予約のお知らせメールを送る Cloudflare Worker の設定
+# 店舗ごとに [vars] を書き換えてください。秘密の値はシークレットに入れます（README.md 参照）。
+name = "〇〇-mail"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+FIREBASE_PROJECT_ID = "ここに-firebase-のプロジェクトid"
+SHOP_NAME = "きん肉こまつ"
+SHOP_URL = "https://ここに-公開url"
+# Resend で認証したドメインのアドレスにする（例: "first PILATES STUDIO <noreply@example.jp>"）
+MAIL_FROM = "きん肉こまつ <onboarding@resend.dev>"
+# お店への通知先。空ならお店には送らない
+SHOP_EMAIL = ""
+# お客様にもメールを送るか。Resend でお店のドメインを認証するまでは "off" にしておく
+#   off … お店への通知だけ送る（ドメインなしでも使えます）
+#   on  … お客様にも予約完了などのメールを送る
+MEMBER_MAIL = "off"
+# アプリの URL。ここ以外のサイトからは呼べない
+ALLOWED_ORIGIN = "https://ここに-公開url"
+# 取消・変更の締め切り（config.js の cancelHours と同じにする）
+CANCEL_HOURS = "24"
+
+# 毎日 18:00（日本時間）に「明日のご予約」のお知らせを送る。GOOGLE_SA を入れたときだけ動く
+[triggers]
+crons = ["0 9 * * *"]
