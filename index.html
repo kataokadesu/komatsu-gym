@@ -2474,6 +2474,8 @@ async function linkAccount(){
 async function memberReserveView(){
   /* 初回体験と、担当を選ばない店舗は、指名なしの空き枠だけを出す */
   if(!MEMBER_PICKS_TRAINER || trialAvailable()) selTrainer=null;
+  /* トレーナーが時間割を変えたとき、開いたままの画面にも出るよう、毎回読み直す */
+  await loadCourseSlots();
   let days=courseDays(curCourse);
   /* 今日の枠がすべて終わっていたら、今日は選べないようにする */
   if(!isSchedCourse(curCourse) && days.length>1 && slotHours().every(h=>isPastSlot(fmtDate(days[0]),h))) days=days.slice(1);
@@ -3075,7 +3077,9 @@ async function submitReserve(date,hour){
 /* 予約を書き込む。空き・とめた枠をもう一度確かめてから登録する */
 async function finalizeReserve(p){
   if(isPastSlot(p.date,p.hour)){ toast('この時間の受付は終了しました'); closeOv(); render(); return false; }
-  /* 会員は、時間割で決まった時間だけ（ほかのコースの枠も取れない）。トレーナーの登録は自由 */
+  /* 会員は、時間割で決まった時間だけ（ほかのコースの枠も取れない）。トレーナーの登録は自由。
+     画面を開いたあとに時間割が変わっていることがあるので、読み直してから確かめる */
+  if(!p.proxy) await loadCourseSlots();
   if(!p.proxy && USE_SCHED && !memberSlotOk(p.course,p.date,p.hour)){
     toast('この時間は予約を受け付けていません'); closeOv(); render(); return false;
   }
@@ -3131,6 +3135,7 @@ async function openMove(id){
   if(!isAdmin && r.user_id!==me.id){toast('この予約は変更できません');return;}
   if(!isAdmin && pastDeadline(r)){toast(`${LATE_REASON}、変更できません。トレーナーにご連絡ください`);return;}
   const mcid=courseIdOf(r);
+  await loadCourseSlots();
   const days=(isSchedCourse(mcid) ? (isAdmin?allDays(BOOK_AHEAD_DAYS):courseDays(mcid)) : nextDays(BOOK_AHEAD_DAYS)).map(fmtDate);
   if(!days.length){ toast('変更できる日がありません'); return; }
   mv={id,r,date:days.includes(r.date)?r.date:days[0]};
@@ -3177,6 +3182,7 @@ async function mvRenderSlots(){
 }
 async function submitMove(h){
   if(isPastSlot(mv.date,h)){toast('この時間の受付は終了しました');mvRenderSlots();return;}
+  if(profile.role!=='admin') await loadCourseSlots();
   if(profile.role!=='admin' && USE_SCHED && !memberSlotOk(courseIdOf(mv.r),mv.date,h)){
     toast('この時間は予約を受け付けていません');mvRenderSlots();return;
   }
