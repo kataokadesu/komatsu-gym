@@ -185,9 +185,42 @@
     .sticky-cta .btn{flex:1;padding:13px 10px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
     footer{padding-bottom:90px}
   }
+  /* 起動画面（アプリと同じ演出） */
+  #splash{position:fixed;inset:0;z-index:999;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;transition:opacity .5s ease;cursor:pointer}
+  #splash.bye{opacity:0;pointer-events:none}
+  .sp-logo{position:relative;width:150px;height:150px}
+  .sp-logo svg{position:absolute;inset:0;width:100%;height:100%;color:var(--ink)}
+  .sp-ring{fill:none;stroke:currentColor;stroke-width:6.5;stroke-dasharray:289;stroke-dashoffset:289;transform-origin:center;transform:rotate(-90deg);animation:spdraw .9s cubic-bezier(.5,0,.2,1) .15s forwards}
+  .sp-ring2{fill:none;stroke:currentColor;stroke-width:2.6;stroke-dasharray:233;stroke-dashoffset:233;transform-origin:center;transform:rotate(-90deg);animation:spdraw .8s cubic-bezier(.5,0,.2,1) .4s forwards}
+  .sp-arm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);animation:sparm .55s cubic-bezier(.2,.9,.3,1.2) .95s forwards}
+  .sp-arm img{width:64%;height:64%;object-fit:contain}
+  .sp-name{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.14em;opacity:0;animation:fadeup .7s ease 1.35s forwards}
+  .sp-tag{font-size:10px;letter-spacing:.45em;color:var(--muted);opacity:0;animation:fadeup .7s ease 1.55s forwards;margin-top:-8px;text-align:center}
+  @keyframes spdraw{to{stroke-dashoffset:0}}
+  @keyframes sparm{to{opacity:1;transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){#splash{display:none}}
 </style>
 </head>
 <body>
+
+<div id="splash" aria-hidden="true">
+  <div class="sp-logo">
+    <svg viewBox="0 0 100 100"><circle class="sp-ring" cx="50" cy="50" r="46"/><circle class="sp-ring2" cx="50" cy="50" r="37"/></svg>
+    <div class="sp-arm"><img src="splash-mark.png" alt=""></div>
+  </div>
+  <div class="sp-name">きん肉こまつ</div>
+  <div class="sp-tag">PERSONAL TRAINING</div>
+</div>
+<script>
+/* 起動画面: 同じタブで2回目以降は出さない。タップで飛ばせる */
+(function(){
+  var s=document.getElementById("splash"),seen=false;
+  try{seen=sessionStorage.getItem("kk_splash")==="1";sessionStorage.setItem("kk_splash","1");}catch(e){}
+  if(seen){s.remove();return;}
+  var done=false;function bye(){if(done)return;done=true;s.classList.add("bye");setTimeout(function(){s.remove()},600);}
+  s.addEventListener("click",bye);setTimeout(bye,2700);
+})();
+</script>
 
 <header>
   <div class="wrap">
