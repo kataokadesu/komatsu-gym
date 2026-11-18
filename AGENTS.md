@@ -56,7 +56,7 @@ HTML 1 枚と設定ファイル 1 枚で動き、ビルドも npm も使いま�
 | コレクション | ドキュメント ID | 主なフィールド |
 | --- | --- | --- |
 | `profiles` | Auth UID | `name`, `role`（`admin` / `member`）, `tickets`, `tickets2`（`SHOP.courses` の2つ目のコースのチケット）, `terms_agreed_at`, `trial_used`（初回体験を使ったか）, `booked_once`（一度でも予約したか）, `intake_done`（登録直後にヒアリングを書き終えたか。どちらかが true なら下のタブを出す） |
-| `settings` | 固定 `"1"` / `"staff"` / `"bootstrap"` | `"1"`: 営業時間など。`"staff"`: スタッフの合言葉 `code`（オーナーだけ読み書き）。`"bootstrap"`: トレーナー登録済みの印と `owner_uid`（オーナー＝最初に登録したトレーナー） |
+| `settings` | 固定 `"1"` / `"staff"` / `"bootstrap"` / `"course_slots"` | `"1"`: 営業時間など。`"staff"`: スタッフの合言葉 `code`（オーナーだけ読み書き）。`"bootstrap"`: トレーナー登録済みの印と `owner_uid`（オーナー＝最初に登録したトレーナー）。`"course_slots"`: コースの時間割 `slots`（`{コースid: {"YYYY-MM": {曜日0〜6: 時刻}}}`。`SHOP.courses` で `schedule: true` のコースだけ使う） |
 | `reservations` | 自動 | `user_id`, `date`（`YYYY-MM-DD`）, `hour`, `party`, `guests`, `tickets_used`, `trainer_id`, `trial`（初回体験）, `course`（`SHOP.courses` の2つ目以降のコースの id。1つ目は書かない） |
 | `reservation_participants` | 自動 | `reservation_id`, `user_id`（相乗り） |
 | `blocks` | 自動 | `date`, `hour`, `trainer_id`（`null` は全員）, `memo`, `by`（予約をとめた枠） |

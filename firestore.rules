@@ -112,6 +112,7 @@ service cloud.firestore {
     //   オーナー未記録の店舗では、トレーナーが一度だけ自分をオーナーとして記録できる
     match /settings/{id} {
       // settings/ai は姿勢分析の AI キー。トレーナーだけが読める
+      // settings/course_slots はコースの時間割。会員も読め、書けるのはトレーナーだけ
       allow read: if (id == 'staff' && isOwner())
         || (id == 'ai' && isAdmin())
         || (id != 'staff' && id != 'ai' && signedIn());
