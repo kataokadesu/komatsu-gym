@@ -4165,7 +4165,9 @@ async function openHoliday(date){
     ...(storeOff?[{tid:null,label:'お店の休み',memo:dayMemo(blocks,null)}]:[]),
     ...offTrainers.map(t=>({tid:t.id,label:t.name+'の休み',memo:dayMemo(blocks,t.id)}))
   ];
-  const slots=dayHours(date).map(h=>{
+  /* 時間割のあるコースを表示しているときは、そのコースのクラスの時間だけを出す */
+  const sc=(USE_SCHED && isSchedCourse(calCourse)) ? courseOf(calCourse) : null;
+  const slots=(sc?schedHours(sc.id,date):dayHours(date)).map(h=>{
     const bs=blocksAt(blocks,h);
     const all=bs.some(b=>!b.trainer_id);
     const names=bs.filter(b=>b.trainer_id).map(b=>trainerName(b.trainer_id).replace(/トレーナー$/,''));
@@ -4174,6 +4176,18 @@ async function openHoliday(date){
     return `<div class="slot ${bs.length?'taken':'open'}" onclick="openBlock('${date}',${h})">
       <div class="t">${hhmm(h)}</div><div class="s">${label}</div></div>`;
   }).join('');
+  if(sc){
+    document.getElementById('ovBody').innerHTML=`
+      <h3>${jdate(date)} ${esc(sc.name)}のお休み</h3>
+      <div class="small" style="margin-bottom:6px;line-height:1.7">休みにしたクラスは、会員が予約できなくなります。<br>すでに入っている予約は取り消されません。</div>
+      <div class="guide-ttl" style="margin-top:14px">この日のクラス</div>
+      ${slots?`<div class="small" style="margin-bottom:8px">時間をタップすると、そのクラスを休みにできます。</div>
+        <div class="slots">${slots}</div>`
+        :`<div class="empty">この日は、${esc(sc.name)}のクラスがありません。</div>`}
+      <div class="small" style="margin-top:12px;line-height:1.7">お店全体やほかの時間を休みにするときは、上で「すべて」を選んでから開いてください。</div>
+      <button class="btn ghost" style="margin-top:14px" onclick="closeOv()">閉じる</button>`;
+    openOv(); return;
+  }
   document.getElementById('ovBody').innerHTML=`
     <h3>${jdate(date)} のお休み</h3>
     <div class="small" style="margin-bottom:6px;line-height:1.7">休みにした日や時間は、会員が予約できなくなります。<br>すでに入っている予約は取り消されません。</div>
