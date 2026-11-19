@@ -6,6 +6,7 @@
 <title>きん肉こまつ｜パーソナルトレーニング</title>
 <meta name="description" content="きん肉こまつは、マンツーマンで体づくりを支えるパーソナルトレーニングジムです。ダイエット・ボディメイク・体力づくりまで、目的に合わせて指導します。">
 <link rel="icon" href="logo-black.png">
+<script>if(!matchMedia("(prefers-reduced-motion:reduce)").matches)document.documentElement.classList.add("js")</script>
 <style>
   :root{
     --ink:#0a0a0a; --paper:#fff; --lime:#ffffff; --smoke:#f4f4f5; --line:#e4e4e7; --muted:#71717a;
@@ -24,49 +25,118 @@
   .tbd{background:#fef08a;color:#0a0a0a;padding:0 4px;border-radius:3px;font-style:normal}
 
   /* ヘッダー */
-  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink)}
+  header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);transition:background .35s ease,color .35s ease}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ink);transform-origin:0 50%;transform:scaleX(var(--p,1))}
+  header.top{background:transparent;backdrop-filter:none;color:var(--paper)}
+  header.top::after{opacity:0}
+  header.top .hd-cta{background:var(--paper);color:var(--ink)}
   header .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:.12em}
-  .brand img{width:34px;height:34px}
+  .brand .lg{position:relative;width:34px;height:34px;flex:0 0 34px}
+  .brand .lg img{position:absolute;inset:0;width:34px;height:34px;transition:opacity .35s ease}
+  .brand .lg .lw{opacity:0}
+  header.top .brand .lg .lw{opacity:1}
+  header.top .brand .lg .lb{opacity:0}
   header nav{display:flex;gap:22px;font-size:13px;font-weight:700;letter-spacing:.06em}
   header nav a{text-decoration:none}
   header nav a:hover{text-decoration:underline}
-  .hd-cta{background:var(--ink);color:var(--paper);text-decoration:none;font-size:13px;font-weight:700;padding:9px 16px;border-radius:9px}
+  .hd-cta{background:var(--ink);color:var(--paper);text-decoration:none;font-size:13px;font-weight:700;padding:9px 16px;border-radius:9px;transition:background .35s ease,color .35s ease}
+  @media(max-width:900px){header nav{gap:14px}}
   @media(max-width:760px){header nav{display:none}}
 
-  /* ヒーロー */
-  .hero{padding:72px 0 80px;border-bottom:2px solid var(--ink)}
-  .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
-  .hyrox{display:inline-block;margin-top:12px;background:var(--ink);color:var(--lime);font-size:12px;font-weight:900;letter-spacing:.12em;padding:6px 12px;border-radius:6px}
-  .eyebrow{font-size:11px;font-weight:700;letter-spacing:.42em;color:var(--muted)}
-  .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,58px);line-height:1.3;letter-spacing:.06em;margin:14px 0 20px}
-  .hero p.lead{font-size:16px;max-width:30em;color:#27272a}
-  .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:15px;padding:15px 26px;border-radius:11px;border:1.5px solid var(--ink);transition:transform .1s}
+  /* ヒーロー: 1階の写真を全面に敷き、見出しは看板のように縦に組む。
+     足元は細い線で区切って「場所・形式・認定」とボタンだけを置く（説明文は直後の紹介セクションへ） */
+  .hero{position:relative;display:flex;align-items:stretch;min-height:min(100svh,900px);padding:96px 0 44px;background:var(--ink);color:var(--paper);overflow:hidden}
+  .hero-bg{position:absolute;inset:0}
+  .hero-bg img{width:100%;height:100%;object-fit:cover;object-position:60% 40%}
+  .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.62) 0%,rgba(10,10,10,.3) 30%,rgba(10,10,10,.42) 55%,rgba(10,10,10,.96) 88%)}
+  .hero .wrap{position:relative;width:100%;display:grid;grid-template-rows:1fr auto;row-gap:24px}
+  .hero h1{justify-self:end;align-self:start;writing-mode:vertical-rl;font-family:var(--serif);font-weight:600;font-size:clamp(38px,min(6vw,7svh),78px);line-height:1.55;letter-spacing:.14em;white-space:nowrap}
+  .ln{display:block;overflow:hidden}
+  .ln>span{display:block}
+  .hero h1 .ln+.ln{padding-top:1.4em}
+  .hero-foot{display:grid;grid-template-columns:1fr auto;column-gap:40px;align-items:center;border-top:1px solid rgba(255,255,255,.4);padding-top:22px}
+  .facts{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;column-gap:36px}
+  .facts>div+div{border-left:1px solid rgba(255,255,255,.3);padding-left:36px}
+  .facts dt{font-size:11px;font-weight:700;letter-spacing:.3em;color:rgba(255,255,255,.62)}
+  .facts dd{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.08em;line-height:1.5;margin-top:4px}
+  .facts dd small{display:block;font-family:var(--sans);font-weight:500;font-size:12.5px;letter-spacing:.04em;color:rgba(255,255,255,.78)}
+  .hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .hero-foot .hero-cta{gap:22px;flex-wrap:nowrap}
+  .txt-link{font-weight:700;font-size:14px;letter-spacing:.06em;text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px;padding:10px 2px;white-space:nowrap}
+  @media(hover:hover){.txt-link:hover{text-decoration-thickness:2px}}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-weight:700;font-size:15px;padding:15px 26px;border-radius:11px;border:1.5px solid var(--ink);transition:transform .1s,background .25s ease,color .25s ease}
   .btn:active{transform:scale(.98)}
   .btn.solid{background:var(--ink);color:var(--paper)}
   .btn.ghost{background:var(--paper);color:var(--ink)}
-  .hero-logo{position:relative;max-width:340px;margin-left:auto;width:100%;text-align:center}
-  .hero-logo img{width:100%;aspect-ratio:1;animation:pop .8s cubic-bezier(.2,.9,.3,1.2) both}
-  .hero-name{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.4vw,34px);letter-spacing:.14em;margin-top:16px;animation:fadeup .7s ease .5s both}
+  @media(hover:hover){
+    .btn.solid:hover{background:var(--paper);color:var(--ink)}
+    .btn.ghost:hover{background:var(--ink);color:var(--paper)}
+  }
+  .hero .btn.solid{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  @media(hover:hover){.hero .btn.solid:hover{background:transparent;color:var(--paper)}}
+  /* 開いたときの一連の動き（のれんがめくれるのに合わせて始まる） */
+  html.js .hero-bg img{transform:scale(1.18)}
+  html.js.go .hero-bg img{transform:scale(1);transition:transform 9s cubic-bezier(.2,.6,.2,1)}
+  html.js .hero .ln>span{transform:translateY(-104%)}
+  html.js.go .hero .ln>span{transform:none;transition:transform 1.2s cubic-bezier(.2,.8,.2,1) .45s}
+  html.js.go .hero .ln+.ln>span{transition-delay:.65s}
+  html.js .hero .fx{opacity:0;transform:translateY(14px)}
+  html.js.go .hero .fx{opacity:1;transform:none;transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1);transition-delay:calc(.9s + var(--i,0)*.12s)}
   @keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+  @media(max-width:1000px){
+    .hero-foot{grid-template-columns:1fr;row-gap:22px}
+  }
   @media(max-width:760px){
-    .hero{padding:44px 0 56px}
-    .hero .wrap{grid-template-columns:1fr}
-    .hero-logo{max-width:180px;margin:0 auto;order:-1}
+    .hero{min-height:100svh;padding:88px 0 36px}
+    .hero-bg img{object-position:74% 40%}
+    .hero-bg::after{background:linear-gradient(180deg,rgba(10,10,10,.62) 0%,rgba(10,10,10,.3) 26%,rgba(10,10,10,.5) 46%,rgba(10,10,10,.93) 64%,rgba(10,10,10,.97) 100%)}
+    .hero h1{font-size:clamp(34px,10.4vw,46px)}
+    .hero-foot{padding-top:6px;row-gap:20px}
+    .facts{grid-template-columns:1fr}
+    .facts>div{display:grid;grid-template-columns:3.4em 1fr;align-items:baseline;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.2)}
+    .facts>div+div{border-left:0;padding-left:0}
+    .facts dd{margin-top:0;font-size:16px}
+    .facts dd small{display:inline;margin-left:.8em}
+    .hero-foot .hero-cta{flex-wrap:wrap;gap:6px;justify-content:center}
     .hero-cta .btn{flex:1 1 100%}
   }
+
+  /* 紹介: ヒーローから出した説明文を、余白をとって読ませる */
+  .intro .wrap{display:grid;grid-template-columns:6fr 5fr;column-gap:64px;align-items:start}
+  .intro-big{font-family:var(--serif);font-weight:600;font-size:clamp(23px,3.2vw,36px);line-height:1.75;letter-spacing:.08em}
+  .intro-body{padding-top:.5em}
+  .intro-body p{font-size:15.5px;line-height:2;color:#3f3f46}
+  .intro-body p+p{margin-top:1.2em}
+  @media(max-width:760px){.intro .wrap{grid-template-columns:1fr;row-gap:22px}}
 
   /* セクション共通 */
   section{padding:84px 0}
   section.alt{background:var(--smoke)}
   section.dark{background:var(--ink);color:var(--paper)}
-  .sec-head{margin-bottom:40px}
-  .sec-head .en{font-size:11px;font-weight:700;letter-spacing:.42em;color:var(--muted)}
-  .sec-head h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3.6vw,34px);letter-spacing:.06em;line-height:1.5;margin-top:8px}
-  section.dark .sec-head .en{color:#a1a1aa}
+  .sec-head{display:grid;grid-template-columns:auto 1fr;column-gap:22px;align-items:start;margin-bottom:44px}
+  .sec-head h2{font-family:var(--serif);font-weight:600;font-size:clamp(25px,3.8vw,38px);letter-spacing:.06em;line-height:1.5;align-self:center}
+  /* 小さなのれん: 上に竿、下に割れ目。現れるときに揺れる */
+  .nr{position:relative;display:block;writing-mode:vertical-rl;font-family:var(--serif);font-weight:600;font-size:15px;line-height:1;letter-spacing:.32em;background:var(--ink);color:var(--paper);padding:15px 10px 24px;margin-top:4px;transform-origin:50% 0;white-space:nowrap}
+  .nr::before{content:"";position:absolute;left:-7px;right:-7px;top:-4px;height:4px;border-radius:2px;background:var(--ink)}
+  .nr::after{content:"";position:absolute;left:50%;bottom:0;width:2px;height:16px;margin-left:-1px;background:var(--paper)}
+  section.dark .nr{background:var(--paper);color:var(--ink)}
+  section.dark .nr::before{background:var(--paper)}
+  section.dark .nr::after{background:var(--ink)}
+  html.js .sec-head.in .nr{animation:sway 1.6s ease-out both}
+  @keyframes sway{0%{transform:rotate(10deg)}28%{transform:rotate(-6.5deg)}52%{transform:rotate(3.8deg)}74%{transform:rotate(-1.6deg)}100%{transform:none}}
+  section[id]{scroll-margin-top:56px}
   @media(max-width:760px){section{padding:60px 0}}
+
+  /* スクロールで現れる動き（現れ終わったら rv を外して素の状態に戻す） */
+  html.js .rv{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--d,0)*80ms)}
+  html.js .rv.in{opacity:1;transform:none}
+  /* 写真: 下へ幕が開くように現れ、スクロールに合わせてわずかに動く。
+     枠（.ph）自体を切り抜くと画面に入ったことを検知できないので、中の画像を切り抜く */
+  .ph{position:relative;overflow:hidden;border-radius:16px;margin:0}
+  .ph img{width:100%;height:100%;object-fit:cover}
+  html.js .ph img{clip-path:inset(0 0 100% 0);transform:translate3d(0,var(--py,0px),0) scale(1.14);transition:clip-path 1.2s cubic-bezier(.7,0,.2,1);transition-delay:calc(var(--d,0)*120ms)}
+  html.js .ph.in img{clip-path:inset(0)}
 
   /* お悩み */
   .worries{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -76,11 +146,105 @@
 
   /* 特徴 */
   .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .feature{border:1.5px solid var(--ink);border-radius:16px;padding:28px 24px;background:var(--paper)}
+  .feature{border:1.5px solid var(--ink);border-radius:16px;padding:28px 24px;background:var(--paper);transition:transform .25s ease,box-shadow .25s ease}
+  @media(hover:hover){.feature:hover{transform:translate(-4px,-4px);box-shadow:6px 6px 0 var(--ink)}}
   .feature .no{font-family:var(--serif);font-size:40px;font-weight:600;line-height:1}
   .feature h3{font-size:18px;margin:16px 0 10px;letter-spacing:.04em}
   .feature p{font-size:14px;color:#3f3f46}
   @media(max-width:860px){.features{grid-template-columns:1fr}}
+
+  /* 実績（ビフォーアフター）: 1組ずつ大きく、テンポよく送る */
+  .ba{--ba-t:2.6s;display:grid;grid-template-columns:5fr 6fr;column-gap:64px;align-items:center}
+  .ba .sec-head{grid-column:1;grid-row:1;align-self:end;margin-bottom:0}
+  .ba-meta{grid-column:1;grid-row:2;align-self:start;margin-top:36px}
+  .ba-stage{grid-column:2;grid-row:1/3;position:relative;display:grid;touch-action:pan-y;border-radius:14px}
+  .ba-stage:focus-visible{outline:2px solid var(--paper);outline-offset:6px}
+  .ba-rail{grid-column:1/-1;grid-row:3;display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin-top:40px}
+  .ba>.dark-note{grid-column:1/-1;grid-row:4;margin-top:16px}
+  .ba-count{display:flex;align-items:baseline;gap:12px;font-family:var(--serif)}
+  .ba-count b{font-size:clamp(76px,9.5vw,124px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .ba-count span{color:#a1a1aa;font-size:18px;letter-spacing:.14em}
+  .ba-cap{font-weight:700;font-size:18px;letter-spacing:.06em;margin-top:12px}
+  .ba-count b.tick,.ba-cap.tick{animation:fadeup .3s ease both}
+  .ba-nav{display:flex;gap:10px;margin-top:28px}
+  .ba-nav button{width:54px;height:54px;border-radius:50%;border:1.5px solid var(--paper);background:transparent;color:var(--paper);cursor:pointer;display:grid;place-items:center;transition:background .2s ease,color .2s ease,transform .1s}
+  .ba-nav button:active{transform:scale(.94)}
+  .ba-nav button:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+  @media(hover:hover){.ba-nav button:hover{background:var(--paper);color:var(--ink)}}
+  .ba-nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #ba-play .i-play,#ba-play.stopped .i-pause{display:none}
+  #ba-play.stopped .i-play{display:block}
+  .ba-slide{grid-area:1/1;display:grid;grid-template-columns:1fr 1fr;gap:8px;visibility:hidden;margin:0}
+  .ba-slide.on,.ba-slide.out{visibility:visible}
+  .ba-slide.on{z-index:1}
+  .half{position:relative;overflow:hidden;aspect-ratio:1/2;border-radius:14px;background:rgba(255,255,255,.06)}
+  .half img{position:absolute;top:0;left:0;width:200%;max-width:none;height:100%;object-fit:cover}
+  .half.a img{left:-100%}
+  .half .tag{position:absolute;top:12px;left:12px;font-size:10px;font-weight:900;letter-spacing:.2em;padding:5px 10px;border-radius:5px}
+  .half.b .tag{background:var(--paper);color:var(--ink)}
+  .half.a .tag{background:var(--ink);color:var(--paper)}
+  /* 切り替え: BEFORE は上から、AFTER は下から、すれ違うように素早く開く */
+  html.js .ba-slide .half.b{clip-path:inset(0 0 100% 0 round 14px)}
+  html.js .ba-slide .half.a{clip-path:inset(100% 0 0 0 round 14px)}
+  html.js .ba-slide .half img{transform:scale(1.1)}
+  html.js .ba-slide.on .half{clip-path:inset(0 round 14px);transition:clip-path .55s cubic-bezier(.7,0,.2,1)}
+  html.js .ba-slide.on .half img{transform:none;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+  html.js .ba-slide.on .half.a,html.js .ba-slide.on .half.a img{transition-delay:.1s}
+  html.js .ba-slide.out .half{clip-path:inset(0 round 14px);opacity:0;transition:opacity .3s ease}
+  html.js .ba-slide.out .half img{transform:none}
+  /* サムネイル: いま見ている組だけ色が付き、下の線が満ちたら次へ進む */
+  .ba-rail button{position:relative;display:block;aspect-ratio:1;padding:0;border:0;border-radius:8px;overflow:hidden;background:none;cursor:pointer;opacity:.38;filter:grayscale(1);transition:opacity .3s ease,filter .3s ease}
+  .ba-rail button img{width:100%;height:100%;object-fit:cover}
+  .ba-rail button.cur{opacity:1;filter:none}
+  @media(hover:hover){.ba-rail button:hover{opacity:.85}}
+  .ba-rail button:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
+  .ba-rail button i{position:absolute;left:0;bottom:0;width:100%;height:4px;background:var(--paper);transform:scaleX(0);transform-origin:0 50%}
+  .ba-rail button.cur i{transform:scaleX(1)}
+  html.js .ba-rail button.cur i{animation:bar var(--ba-t) linear both}
+  html.js .ba.paused .ba-rail button.cur i{animation-play-state:paused}
+  @keyframes bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @media(max-width:860px){
+    .ba{grid-template-columns:1fr}
+    .ba .sec-head,.ba-meta,.ba-stage{grid-column:1;grid-row:auto}
+    .ba-stage{width:100%;max-width:520px;justify-self:center}
+    .ba .sec-head{margin-bottom:24px}
+    .ba-meta{display:grid;grid-template-columns:1fr auto;align-items:end;margin-top:18px}
+    .ba-count b{font-size:60px}
+    .ba-cap{font-size:16px;margin-top:4px}
+    .ba-nav{margin-top:0;grid-column:2;grid-row:1/3;gap:8px}
+    .ba-nav button{width:48px;height:48px}
+    .ba-rail{grid-row:auto;display:flex;gap:6px;margin:18px -20px 0;padding:0 20px;overflow-x:auto;scrollbar-width:none}
+    .ba-rail::-webkit-scrollbar{display:none}
+    .ba-rail button{flex:0 0 60px}
+    .ba>.dark-note{grid-row:auto}
+  }
+
+  /* 店内 */
+  .floorrow{display:grid;grid-template-columns:7fr 5fr;gap:44px;align-items:stretch;margin-top:84px}
+  .sec-head+.floorrow{margin-top:0}
+  .floorrow.flip{grid-template-columns:5fr 7fr}
+  .floorrow.flip .shot{order:2}
+  .shot{min-height:420px}
+  .shot img{position:absolute;inset:0}
+  .fno{font-family:var(--serif);font-size:clamp(72px,11vw,132px);line-height:.86;font-weight:600;letter-spacing:.02em}
+  .ftxt h3{font-size:20px;margin:18px 0 8px;letter-spacing:.06em}
+  .ftxt p{font-size:14.5px;color:#3f3f46;max-width:25em}
+  .smalls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+  .smalls .ph{aspect-ratio:4/3}
+  .smalls.one{grid-template-columns:1fr}
+  .smalls.one .ph{aspect-ratio:16/10}
+  @media(max-width:760px){
+    .floorrow,.floorrow.flip{grid-template-columns:1fr;gap:22px;margin-top:56px}
+    .floorrow.flip .shot{order:0}
+    .shot{min-height:0;aspect-ratio:4/3}
+    .fno{font-size:72px}
+    .smalls{margin-top:20px;gap:8px}
+  }
+
+  /* 店舗情報の外観写真 */
+  .front{margin-top:20px}
+  .front .ph{aspect-ratio:4/3}
+  .front figcaption{padding:10px 2px 0;font-size:13px;font-weight:700}
 
   /* 目的 */
   .goal-label{font-size:12px;font-weight:700;letter-spacing:.2em;color:rgba(255,255,255,.6);margin:0 0 10px}
@@ -104,6 +268,7 @@
   .ptabs button{font:inherit;font-weight:700;font-size:15px;padding:11px 22px;border-radius:40px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
   .ptabs button.on{background:var(--ink);color:var(--paper)}
   .ppanel[hidden]{display:none}
+  html.js .ppanel.swap{animation:fadeup .45s ease both}
   .ptables{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:760px){.ptables{grid-template-columns:1fr}}
   .ptable{border:1.5px solid var(--ink);border-radius:16px;padding:22px 22px 10px;background:var(--paper)}
@@ -126,7 +291,10 @@
 
   /* 流れ */
   .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:st}
-  .step{border-top:2px solid var(--ink);padding-top:16px}
+  .step{border-top:2px solid var(--ink);padding-top:16px;position:relative}
+  html.js .step{border-top-color:transparent}
+  html.js .step::before{content:"";position:absolute;left:0;right:0;top:-2px;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:0 50%;transition:transform .9s cubic-bezier(.7,0,.2,1);transition-delay:calc(var(--d,0)*160ms)}
+  html.js .step.in::before{transform:scaleX(1)}
   .step .n{font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--muted)}
   .step h3{font-size:17px;margin:6px 0 8px}
   .step p{font-size:14px;color:#3f3f46}
@@ -156,6 +324,9 @@
   .faq details[open] summary::after{content:"－"}
   .faq summary::-webkit-details-marker{display:none}
   .faq details p{margin-top:10px;font-size:14px;color:#3f3f46}
+  html.js .faq details[open] p{animation:fadeup .4s ease both}
+  .faq summary::after{transition:transform .3s ease}
+  .faq details[open] summary::after{transform:rotate(180deg)}
 
   /* 店舗情報 */
   .info{display:grid;grid-template-columns:1fr 1fr;gap:32px}
@@ -166,9 +337,35 @@
   .info dd{font-size:15px;overflow-wrap:anywhere}
   @media(max-width:360px){.info dl{grid-template-columns:6em minmax(0,1fr)}}
   .mapbox{display:flex;flex-direction:column;gap:10px}
-  .map-frame{position:relative;border:1.5px solid var(--ink);border-radius:16px;overflow:hidden;background:var(--smoke);aspect-ratio:4/3;min-height:260px}
-  .map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-  .map-frame .map-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:14px;text-align:center;padding:20px}
+  .map-frame{position:relative;border:1.5px solid var(--ink);border-radius:16px;overflow:hidden;background:var(--smoke);aspect-ratio:4/3}
+  .map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:5}
+  .map-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .map-line{position:absolute;inset:0;width:100%;height:100%}
+  .map-line line{stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-dasharray:.1 11;vector-effect:non-scaling-stroke}
+  .mk{position:absolute;display:block;width:0;height:0}
+  .mk b{position:absolute;left:0;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:900;letter-spacing:.06em;line-height:1;padding:6px 9px;border-radius:6px;background:var(--ink);color:var(--paper)}
+  .mk.sta i{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:var(--paper);border:5px solid var(--ink)}
+  .mk.sta b{top:-40px;background:var(--paper);color:var(--ink);border:1.5px solid var(--ink)}
+  .mk.gym i{position:absolute;left:-23px;top:-23px;width:46px;height:46px;border-radius:50%;background:var(--paper);border:2.5px solid var(--ink);display:grid;place-items:center}
+  .mk.gym i img{width:30px;height:30px}
+  .mk.gym i::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;border:2px solid var(--ink);opacity:0}
+  .mk.gym b{top:32px}
+  .walk{position:absolute;transform:translate(-50%,-50%);font-size:11px;font-weight:900;letter-spacing:.1em;line-height:1;padding:6px 10px;border-radius:20px;background:var(--paper);border:1.5px solid var(--ink);white-space:nowrap}
+  .osm{position:absolute;right:0;bottom:0;font-size:10px;line-height:1;padding:5px 8px;background:rgba(255,255,255,.88);color:var(--muted);text-decoration:none;border-top-left-radius:8px}
+  /* 画面に入ったら: 駅が点り、点線が伸び、のれんの紋が落ちてくる */
+  html.js .map-line{clip-path:inset(0 100% 0 0)}
+  html.js .map-frame.in .map-line{clip-path:inset(0);transition:clip-path 1.1s cubic-bezier(.5,0,.2,1) .35s}
+  html.js .mk.sta,html.js .walk{opacity:0}
+  html.js .map-frame.in .mk.sta{opacity:1;transition:opacity .4s ease .15s}
+  html.js .map-frame.in .walk{opacity:1;transition:opacity .4s ease 1s}
+  html.js .mk.gym{opacity:0}
+  html.js .map-frame.in .mk.gym{animation:pindrop .7s cubic-bezier(.2,1.25,.4,1) 1.3s both}
+  html.js .map-frame.in .mk.gym i::after{animation:ping 2.6s ease-out 2.2s infinite}
+  @keyframes pindrop{from{opacity:0;transform:translateY(-46px)}to{opacity:1;transform:none}}
+  @keyframes ping{from{opacity:.7;transform:scale(1)}to{opacity:0;transform:scale(2.3)}}
+  .map-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .map-actions button{font-family:inherit;cursor:pointer}
+  @media(max-width:520px){.map-actions{grid-template-columns:1fr}}
   .map-link{align-self:stretch;font-size:14px;padding:12px 16px}
   @media(max-width:760px){.info{grid-template-columns:1fr}}
 
@@ -188,20 +385,27 @@
   .sticky-cta{display:none}
   @media(max-width:760px){
     .sticky-cta{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:60;gap:8px}
+    html.js .sticky-cta{transform:translateY(140%);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+    html.js .sticky-cta.show{transform:none}
     .sticky-cta .btn{flex:1;padding:13px 10px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.18)}
     footer{padding-bottom:90px}
   }
-  /* 起動画面（アプリと同じ演出） */
-  #splash{position:fixed;inset:0;z-index:999;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;transition:opacity .5s ease;cursor:pointer}
-  #splash.bye{opacity:0;pointer-events:none}
+  /* 起動画面: のれんに紋が描かれ、手前にめくれ上がって店内が現れる */
+  #splash{position:fixed;inset:0;z-index:999;cursor:pointer;overflow:hidden;perspective:1300px;perspective-origin:50% 0}
+  #splash.bye{pointer-events:none}
+  .np{position:absolute;top:0;bottom:0;left:calc(var(--n)*25vw);width:calc(25vw + 1px);background:var(--paper);overflow:hidden;transform-origin:50% 0;box-shadow:inset -1px 0 0 var(--line)}
+  .np:last-of-type{box-shadow:none;width:26vw}
+  #splash.bye .np{transform:rotateX(-100deg);opacity:0;transition:transform 1s cubic-bezier(.6,0,.25,1),opacity .3s ease .7s;transition-delay:calc(var(--o)*90ms),calc(.7s + var(--o)*90ms)}
+  #splash .rod{position:absolute;left:0;right:0;top:0;height:10px;background:var(--ink);z-index:2;transition:transform .45s ease .75s}
+  #splash.bye .rod{transform:translateY(-100%)}
+  .crest{position:absolute;top:50%;left:calc(50vw - var(--n)*25vw);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:22px;width:max-content}
   .sp-logo{position:relative;width:150px;height:150px}
   .sp-logo svg{position:absolute;inset:0;width:100%;height:100%;color:var(--ink)}
-  .sp-ring{fill:none;stroke:currentColor;stroke-width:6.5;stroke-dasharray:289;stroke-dashoffset:289;transform-origin:center;transform:rotate(-90deg);animation:spdraw .9s cubic-bezier(.5,0,.2,1) .15s forwards}
-  .sp-ring2{fill:none;stroke:currentColor;stroke-width:2.6;stroke-dasharray:233;stroke-dashoffset:233;transform-origin:center;transform:rotate(-90deg);animation:spdraw .8s cubic-bezier(.5,0,.2,1) .4s forwards}
-  .sp-arm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);animation:sparm .55s cubic-bezier(.2,.9,.3,1.2) .95s forwards}
+  .sp-ring{fill:none;stroke:currentColor;stroke-width:6.5;stroke-dasharray:289;stroke-dashoffset:289;transform-origin:center;transform:rotate(-90deg);animation:spdraw .8s cubic-bezier(.5,0,.2,1) .1s forwards}
+  .sp-ring2{fill:none;stroke:currentColor;stroke-width:2.6;stroke-dasharray:233;stroke-dashoffset:233;transform-origin:center;transform:rotate(-90deg);animation:spdraw .7s cubic-bezier(.5,0,.2,1) .3s forwards}
+  .sp-arm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.7);animation:sparm .5s cubic-bezier(.2,.9,.3,1.2) .8s forwards}
   .sp-arm img{width:64%;height:64%;object-fit:contain}
-  .sp-name{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.14em;opacity:0;animation:fadeup .7s ease 1.35s forwards}
-  .sp-tag{font-size:10px;letter-spacing:.45em;color:var(--muted);opacity:0;animation:fadeup .7s ease 1.55s forwards;margin-top:-8px;text-align:center}
+  .sp-name{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:.14em;opacity:0;animation:fadeup .6s ease 1.1s forwards}
   @keyframes spdraw{to{stroke-dashoffset:0}}
   @keyframes sparm{to{opacity:1;transform:scale(1)}}
   @media (prefers-reduced-motion:reduce){#splash{display:none}}
@@ -209,28 +413,43 @@
 </head>
 <body>
 
+<noscript><style>#splash{display:none}</style></noscript>
 <div id="splash" aria-hidden="true">
-  <div class="sp-logo">
-    <svg viewBox="0 0 100 100"><circle class="sp-ring" cx="50" cy="50" r="46"/><circle class="sp-ring2" cx="50" cy="50" r="37"/></svg>
-    <div class="sp-arm"><img src="splash-mark.png" alt=""></div>
-  </div>
-  <div class="sp-name">きん肉こまつ</div>
-  <div class="sp-tag">PERSONAL TRAINING</div>
+  <div class="rod"></div>
+  <div class="np" style="--n:0;--o:1"><div class="crest">
+    <div class="sp-logo"><svg viewBox="0 0 100 100"><circle class="sp-ring" cx="50" cy="50" r="46"/><circle class="sp-ring2" cx="50" cy="50" r="37"/></svg><div class="sp-arm"><img src="splash-mark.png" alt=""></div></div>
+    <div class="sp-name">きん肉こまつ</div>
+  </div></div>
+  <div class="np" style="--n:1;--o:0"><div class="crest">
+    <div class="sp-logo"><svg viewBox="0 0 100 100"><circle class="sp-ring" cx="50" cy="50" r="46"/><circle class="sp-ring2" cx="50" cy="50" r="37"/></svg><div class="sp-arm"><img src="splash-mark.png" alt=""></div></div>
+    <div class="sp-name">きん肉こまつ</div>
+  </div></div>
+  <div class="np" style="--n:2;--o:0"><div class="crest">
+    <div class="sp-logo"><svg viewBox="0 0 100 100"><circle class="sp-ring" cx="50" cy="50" r="46"/><circle class="sp-ring2" cx="50" cy="50" r="37"/></svg><div class="sp-arm"><img src="splash-mark.png" alt=""></div></div>
+    <div class="sp-name">きん肉こまつ</div>
+  </div></div>
+  <div class="np" style="--n:3;--o:1"><div class="crest">
+    <div class="sp-logo"><svg viewBox="0 0 100 100"><circle class="sp-ring" cx="50" cy="50" r="46"/><circle class="sp-ring2" cx="50" cy="50" r="37"/></svg><div class="sp-arm"><img src="splash-mark.png" alt=""></div></div>
+    <div class="sp-name">きん肉こまつ</div>
+  </div></div>
 </div>
 <script>
-/* 起動画面: ページを開くたび（再読み込みでも）出す。タップで飛ばせる */
+/* 起動画面: ページを開くたび（再読み込みでも）出す。タップで飛ばせる。
+   のれんは4枚に分かれていて、真ん中の2枚から先にめくれる */
 (function(){
   var s=document.getElementById("splash");
-  var done=false;function bye(){if(done)return;done=true;s.classList.add("bye");setTimeout(function(){s.remove()},600);}
-  s.addEventListener("click",bye);setTimeout(bye,2700);
+  var done=false;function bye(){if(done)return;done=true;document.documentElement.classList.add("go");s.classList.add("bye");setTimeout(function(){s.remove()},1500);}
+  s.addEventListener("click",bye);setTimeout(bye,2200);
 })();
 </script>
 
-<header>
+<header id="hd">
   <div class="wrap">
-    <a class="brand" href="#top"><img src="logo-black.png" alt="">きん肉こまつ</a>
+    <a class="brand" href="#top"><span class="lg"><img class="lb" src="logo-black.png" alt=""><img class="lw" src="logo-white.png" alt=""></span>きん肉こまつ</a>
     <nav>
+      <a href="#results">実績</a>
       <a href="#feature">特徴</a>
+      <a href="#gym">店内</a>
       <a href="#price">料金</a>
       <a href="#flow">ご利用の流れ</a>
       <a href="#faq">よくある質問</a>
@@ -242,18 +461,31 @@
 
 <!-- ヒーロー -->
 <section class="hero" id="top">
+  <div class="hero-bg"><img src="photos/hero.jpg" width="1477" height="1108" fetchpriority="high" alt="きん肉こまつの1階。奥にロゴ入りののれん、手前にマシンとダンベルが並ぶ"></div>
   <div class="wrap">
-    <div>
-      <div class="eyebrow"><span class="nb">PERSONAL TRAINING ／&nbsp;</span><span class="nb">OSAKA SAKAI</span></div>
-      <span class="hyrox">HYROX 公式認定ジム</span>
-      <h1>あなたの目的に、<br>まっすぐ効く。</h1>
-      <p class="lead">きん肉こまつは、大阪・堺の完全予約制パーソナルトレーニングジム。40代・50代や運動が初めての方を中心に、マンツーマン・ペアのパーソナルから、世界的フィットネスレース「HYROX」の公式認定ジムとしてのグループトレーニングまで。最初のヒアリングで目的を伺い、一人ひとりに合わせたメニューで進めます。</p>
-      <div class="hero-cta">
+    <h1><span class="ln"><span>あなたの目的に、</span></span><span class="ln"><span>まっすぐ効く。</span></span></h1>
+    <div class="hero-foot">
+      <dl class="facts fx">
+        <div><dt>場所</dt><dd>大阪・堺<small>深井駅から徒歩8分</small></dd></div>
+        <div><dt>形式</dt><dd>完全予約制<small>マンツーマン・ペア</small></dd></div>
+        <div><dt>認定</dt><dd>HYROX<small>公式認定ジム</small></dd></div>
+      </dl>
+      <div class="hero-cta fx" style="--i:1">
         <a class="btn solid" href="https://kataokadesu.github.io/komatsu-gym/?taiken">はじめての方はこちら</a>
-        <a class="btn ghost" href="#price">料金を見る</a>
+        <a class="txt-link" href="#price">料金を見る</a>
       </div>
     </div>
-    <div class="hero-logo"><img src="logo-black.png" alt="きん肉こまつ ロゴ"><div class="hero-name">きん肉こまつ</div></div>
+  </div>
+</section>
+
+<!-- 紹介 -->
+<section class="intro">
+  <div class="wrap">
+    <p class="intro-big"><span class="nb">きん肉こまつは、</span><span class="nb">大阪・堺の</span><span class="nb">完全予約制</span><span class="nb">パーソナル</span><span class="nb">トレーニングジム。</span></p>
+    <div class="intro-body">
+      <p>40代・50代や運動が初めての方を中心に、マンツーマン・ペアのパーソナルから、世界的フィットネスレース「HYROX」の公式認定ジムとしてのグループトレーニングまで。</p>
+      <p>最初のヒアリングで目的を伺い、一人ひとりに合わせたメニューで進めます。</p>
+    </div>
   </div>
 </section>
 
@@ -261,7 +493,7 @@
 <section class="alt">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">FOR YOU</div>
+      <div class="nr">お悩み</div>
       <h2><span class="nb">こんなお悩み、</span><span class="nb">ありませんか？</span></h2>
     </div>
     <div class="worries">
@@ -276,11 +508,45 @@
   </div>
 </section>
 
+<!-- 実績 -->
+<section class="dark" id="results">
+  <div class="wrap ba">
+    <div class="sec-head">
+      <div class="nr">実績</div>
+      <h2><span class="nb">会員さまの、</span><span class="nb">ビフォーアフター。</span></h2>
+    </div>
+    <div class="ba-stage" tabindex="0" role="group" aria-roledescription="カルーセル" aria-label="会員さまのビフォーアフター写真">
+      <figure class="ba-slide on" data-cap="全身（正面）"><div class="half b"><img src="photos/result-01.jpg" width="960" height="960" alt="会員さまのトレーニング前後。全身を正面から撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-01.jpg" width="960" height="960" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="上半身（正面）"><div class="half b"><img src="photos/result-02.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。上半身を正面から撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-02.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="ボディメイク大会に出場"><div class="half b"><img src="photos/result-03.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前と、大会のステージでの姿"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-03.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="お腹まわり"><div class="half b"><img src="photos/result-04.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。お腹まわりを正面から撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-04.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="上半身（正面）"><div class="half b"><img src="photos/result-05.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。上半身を正面から撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-05.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="背中"><div class="half b"><img src="photos/result-06.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。背中を撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-06.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="背中"><div class="half b"><img src="photos/result-07.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。背中を撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-07.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="お腹まわり"><div class="half b"><img src="photos/result-08.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。お腹まわりを正面から撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-08.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+      <figure class="ba-slide" data-cap="ヒップライン"><div class="half b"><img src="photos/result-09.jpg" width="960" height="960" loading="lazy" alt="会員さまのトレーニング前後。ヒップラインを横から撮影"><span class="tag" aria-hidden="true">BEFORE</span></div><div class="half a"><img src="photos/result-09.jpg" width="960" height="960" loading="lazy" alt="" aria-hidden="true"><span class="tag" aria-hidden="true">AFTER</span></div></figure>
+    </div>
+    <div class="ba-meta">
+      <div>
+        <div class="ba-count"><b id="ba-n">01</b><span>/ 09</span></div>
+        <p class="ba-cap" id="ba-cap" aria-live="polite">全身（正面）</p>
+      </div>
+      <div class="ba-nav">
+        <button type="button" id="ba-prev" aria-label="前の写真"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
+        <button type="button" id="ba-play" aria-label="自動送りを止める"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l9 6-9 6z"/></svg></button>
+        <button type="button" id="ba-next" aria-label="次の写真"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>
+      </div>
+    </div>
+    <div class="ba-rail"><button type="button" aria-label="1組目を表示"><img src="photos/result-01.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="2組目を表示"><img src="photos/result-02.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="3組目を表示"><img src="photos/result-03.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="4組目を表示"><img src="photos/result-04.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="5組目を表示"><img src="photos/result-05.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="6組目を表示"><img src="photos/result-06.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="7組目を表示"><img src="photos/result-07.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="8組目を表示"><img src="photos/result-08.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button><button type="button" aria-label="9組目を表示"><img src="photos/result-09.jpg" width="960" height="960" loading="lazy" alt=""><i></i></button></div>
+    <p class="dark-note">※写真は、きん肉こまつでトレーニングを続けた会員さまのものです。結果には個人差があります。</p>
+  </div>
+</section>
+
 <!-- 特徴 -->
 <section id="feature">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">FEATURES</div>
+      <div class="nr">特徴</div>
       <h2>きん肉こまつの3つの特徴</h2>
     </div>
     <div class="features">
@@ -303,11 +569,42 @@
   </div>
 </section>
 
+<!-- 店内 -->
+<section class="alt" id="gym">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="nr">店内</div>
+      <h2><span class="nb">1階はウェイト、</span><span class="nb">2階はHYROX。</span></h2>
+    </div>
+    <div class="floorrow">
+      <figure class="ph shot"><img src="photos/gym-1f-1.jpg" width="1200" height="900" loading="lazy" alt="1階のウェイトエリア。パワーラックやレッグプレスが並ぶ"></figure>
+      <div class="ftxt">
+        <div class="fno rv">1F</div>
+        <h3 class="rv">ウェイトエリア</h3>
+        <p class="rv">パワーラック、レッグプレス、壁一面のダンベル。フォームを見ながら、じっくり重さと向き合うフロアです。</p>
+        <div class="smalls one"><figure class="ph" style="--d:1"><img src="photos/gym-1f-2.jpg" width="1200" height="900" loading="lazy" alt="1階のウェイトエリア。壁沿いにダンベルが並び、奥に2階への階段がある"></figure></div>
+      </div>
+    </div>
+    <div class="floorrow flip">
+      <figure class="ph shot"><img src="photos/gym-2f-1.jpg" width="1200" height="900" loading="lazy" alt="2階の人工芝エリア。スレッドやローイングマシンがある"></figure>
+      <div class="ftxt">
+        <div class="fno rv">2F</div>
+        <h3 class="rv">HYROX・有酸素エリア</h3>
+        <p class="rv">人工芝のレーンに、スレッド、ローイング、トレッドミル。HYROXの種目に対応した器具がそろっています。</p>
+        <div class="smalls">
+          <figure class="ph" style="--d:1"><img src="photos/gym-2f-2.jpg" width="1200" height="900" loading="lazy" alt="2階のマシンエリア"></figure>
+          <figure class="ph" style="--d:2"><img src="photos/gym-2f-3.jpg" width="1200" height="900" loading="lazy" alt="2階のトレッドミルとローイングマシン"></figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 目的 -->
 <section class="dark">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">YOUR GOAL</div>
+      <div class="nr">目的</div>
       <h2>目的に合わせて、<br>何でもご相談ください。</h2>
     </div>
     <p class="goal-label">目的</p>
@@ -336,7 +633,7 @@
 <section class="alt" id="price">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">PRICE</div>
+      <div class="nr">料金</div>
       <h2>料金プラン</h2>
     </div>
     <div class="trial">
@@ -425,7 +722,7 @@
 <section id="flow">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">FLOW</div>
+      <div class="nr">流れ</div>
       <h2>ご利用の流れ</h2>
     </div>
     <div class="flow">
@@ -442,7 +739,7 @@
   <div class="wrap app">
     <div>
       <div class="sec-head" style="margin-bottom:20px">
-        <div class="en">RESERVATION APP</div>
+        <div class="nr">予約</div>
         <h2>予約もチケットも、<br>スマホひとつで。</h2>
       </div>
       <ul>
@@ -465,7 +762,7 @@
 <section id="faq">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">FAQ</div>
+      <div class="nr">質問</div>
       <h2>よくある質問</h2>
     </div>
     <div class="faq">
@@ -484,10 +781,11 @@
 <section class="alt" id="access">
   <div class="wrap">
     <div class="sec-head">
-      <div class="en">ACCESS</div>
+      <div class="nr">店舗</div>
       <h2>店舗情報</h2>
     </div>
     <div class="info">
+      <div>
       <dl>
         <dt>店名</dt><dd>きん肉こまつ</dd>
         <dt>住所</dt><dd>大阪府堺市中区深井沢町307-9</dd>
@@ -497,12 +795,21 @@
         <dt>駐車場</dt><dd>あり</dd>
         <dt>お問い合わせ</dt><dd><a href="https://www.instagram.com/kinnikukomatsu/" target="_blank" rel="noopener">Instagram @kinnikukomatsu</a></dd>
       </dl>
+      <figure class="front"><div class="ph"><img src="photos/exterior-1.jpg" width="1200" height="900" loading="lazy" alt="きん肉こまつの外観。ロゴ入りの白いのれんが掛かっている"></div><figcaption>ロゴ入りの白いのれんが目印です</figcaption></figure>
+      </div>
       <div class="mapbox">
         <div class="map-frame">
-          <div class="map-fallback"><svg class="pin big" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>大阪府堺市中区深井沢町307-9</span></div>
-          <iframe src="https://maps.google.com/maps?q=%E5%A4%A7%E9%98%AA%E5%BA%9C%E5%A0%BA%E5%B8%82%E4%B8%AD%E5%8C%BA%E6%B7%B1%E4%BA%95%E6%B2%A2%E7%94%BA307-9&amp;t=k&amp;z=18&amp;hl=ja&amp;output=embed" title="きん肉こまつ 周辺の航空写真" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+          <img class="map-img" src="photos/access-map.jpg" width="800" height="600" loading="lazy" alt="深井駅ときん肉こまつの周辺地図。きん肉こまつは深井駅の東側、徒歩8分">
+          <svg class="map-line" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true"><line x1="146" y1="230" x2="654" y2="370"/></svg>
+          <span class="walk" style="left:50%;top:50%" aria-hidden="true">徒歩8分</span>
+          <span class="mk sta" style="left:18.25%;top:38.3%" aria-hidden="true"><i></i><b>深井駅</b></span>
+          <span class="mk gym" style="left:81.75%;top:61.7%" aria-hidden="true"><i><img src="logo-black.png" alt=""></i><b>きん肉こまつ</b></span>
+          <a class="osm" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
         </div>
-        <a class="btn ghost map-link" href="https://www.google.com/maps/search/?api=1&amp;query=%E5%A4%A7%E9%98%AA%E5%BA%9C%E5%A0%BA%E5%B8%82%E4%B8%AD%E5%8C%BA%E6%B7%B1%E4%BA%95%E6%B2%A2%E7%94%BA307-9" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Googleマップアプリで開く</a>
+        <div class="map-actions">
+          <a class="btn ghost map-link" href="https://www.google.com/maps/search/?api=1&amp;query=%E5%A4%A7%E9%98%AA%E5%BA%9C%E5%A0%BA%E5%B8%82%E4%B8%AD%E5%8C%BA%E6%B7%B1%E4%BA%95%E6%B2%A2%E7%94%BA307-9" target="_blank" rel="noopener"><svg class="pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Googleマップで開く</a>
+          <button type="button" class="btn ghost map-link" id="map-sw" hidden data-src="https://maps.google.com/maps?q=%E5%A4%A7%E9%98%AA%E5%BA%9C%E5%A0%BA%E5%B8%82%E4%B8%AD%E5%8C%BA%E6%B7%B1%E4%BA%95%E6%B2%A2%E7%94%BA307-9&amp;t=k&amp;z=18&amp;hl=ja&amp;output=embed">航空写真で見る</button>
+        </div>
       </div>
     </div>
   </div>
@@ -534,10 +841,112 @@
 </div>
 
 <script>
+/* 料金タブ */
 document.querySelectorAll('.ptabs button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.ptabs button').forEach(x=>x.classList.toggle('on',x===b));
-  document.querySelectorAll('.ppanel').forEach(p=>p.hidden=p.id!=='p-'+b.dataset.p);
+  document.querySelectorAll('.ppanel').forEach(p=>{p.hidden=p.id!=='p-'+b.dataset.p;p.classList.remove('swap');if(!p.hidden){void p.offsetWidth;p.classList.add('swap')}});
 }));
+
+/* ===== 動き ===== */
+(function(){
+  var root=document.documentElement,anim=root.classList.contains('js');
+  var hd=document.getElementById('hd'),hero=document.getElementById('top'),sticky=document.querySelector('.sticky-cta');
+
+  /* スクロールで現れる要素。兄弟の中の順番で少しずつ遅らせる */
+  if(anim&&'IntersectionObserver' in window){
+    var groups=['.sec-head','.worry','.answer','.feature','.goal-label','.goal','.dark-note','.trial','.ptabs','.ptable','.conds','.step','.app li','.phone','.faq details','.info dl','.mapbox','.cta .wrap>*','.ftxt>.rv','.intro-big','.intro-body p'];
+    document.querySelectorAll(groups.join(',')).forEach(function(el){
+      if(el.closest('.ba')&&!el.classList.contains('sec-head'))return;
+      el.classList.add('rv');
+      var i=0,p=el.previousElementSibling;while(p&&i<6){if(p.classList.contains('rv'))i++;p=p.previousElementSibling}
+      if(!el.style.getPropertyValue('--d'))el.style.setProperty('--d',i);
+    });
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var el=e.target;io.unobserve(el);el.classList.add('in');
+      if(el.classList.contains('rv'))el.addEventListener('transitionend',function f(ev){if(ev.target!==el||ev.propertyName!=='transform')return;el.removeEventListener('transitionend',f);el.classList.remove('rv');el.style.removeProperty('--d')});
+    })},{rootMargin:'0px 0px -12% 0px',threshold:.12});
+    document.querySelectorAll('.rv,.ph,.map-frame').forEach(function(el){io.observe(el)});
+  }else{
+    document.querySelectorAll('.ph,.step,.map-frame').forEach(function(el){el.classList.add('in')});
+  }
+
+  /* ヘッダー・固定ボタン・写真のゆるい視差 */
+  var phs=anim?[].slice.call(document.querySelectorAll('.ph')):[],tick=false,baSec=document.getElementById('results');
+  function onScroll(){
+    tick=false;
+    var y=window.scrollY,vh=window.innerHeight,hh=hero.offsetHeight;
+    hd.classList.toggle('top',y<hh-70);
+    var max=document.documentElement.scrollHeight-vh;
+    hd.style.setProperty('--p',max>0?Math.min(1,y/max).toFixed(4):1);
+    /* 固定ボタンはヒーローを過ぎてから。ビフォーアフターの操作ボタンに重なる間は引っ込める */
+    var br=baSec?baSec.getBoundingClientRect():null;
+    if(sticky)sticky.classList.toggle('show',y>hh*.6&&!(br&&br.top<vh*.55&&br.bottom>vh*.7));
+    phs.forEach(function(el){
+      var r=el.getBoundingClientRect();if(r.bottom<-50||r.top>vh+50)return;
+      var t=((r.top+r.height/2)-vh/2)/vh;
+      el.style.setProperty('--py',(t*-r.height*.06).toFixed(1)+'px');
+    });
+  }
+  window.addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(onScroll)}},{passive:true});
+  window.addEventListener('resize',onScroll);
+  onScroll();
+
+  /* 地図: ふだんは自前の地図。ボタンを押したときだけGoogleの航空写真を読み込む */
+  var sw=document.getElementById('map-sw');
+  if(sw){
+    sw.hidden=false;
+    sw.addEventListener('click',function(){
+      var f=document.querySelector('.map-frame'),fr=f.querySelector('iframe');
+      if(fr){fr.remove();sw.textContent='航空写真で見る';return}
+      fr=document.createElement('iframe');fr.src=sw.dataset.src;fr.title='きん肉こまつ 周辺の航空写真';fr.referrerPolicy='no-referrer-when-downgrade';fr.allowFullscreen=true;
+      f.appendChild(fr);sw.textContent='地図に戻す';
+    });
+  }
+
+  /* ビフォーアフター: 1組ずつ。下のバーが満ちたら次へ進む */
+  var ba=document.querySelector('.ba');if(!ba)return;
+  var stage=ba.querySelector('.ba-stage'),slides=[].slice.call(ba.querySelectorAll('.ba-slide')),bars=[].slice.call(ba.querySelectorAll('.ba-rail button')),rail=ba.querySelector('.ba-rail'),play=document.getElementById('ba-play');
+  var num=document.getElementById('ba-n'),cap=document.getElementById('ba-cap'),cur=-1,hover=false,vis=false,stopped=false;
+  function pulse(el){el.classList.remove('tick');void el.offsetWidth;el.classList.add('tick')}
+  function show(k){
+    k=(k+slides.length)%slides.length;if(k===cur)return;
+    var old=slides[cur];
+    if(old){old.classList.remove('on');old.classList.add('out');setTimeout(function(){old.classList.remove('out')},340)}
+    cur=k;
+    slides.forEach(function(s,j){s.setAttribute('aria-hidden',j!==k)});
+    slides[k].classList.remove('out');slides[k].classList.add('on');
+    bars.forEach(function(b,j){b.classList.remove('cur');if(j===k)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current')});
+    void bars[k].offsetWidth;bars[k].classList.add('cur');
+    /* スマホではサムネイルの列だけを横に送って、いまの組を中央に寄せる（ページ自体は動かさない） */
+    if(rail.scrollWidth>rail.clientWidth)rail.scrollTo({left:bars[k].offsetLeft-rail.offsetLeft-(rail.clientWidth-bars[k].offsetWidth)/2,behavior:anim?'smooth':'auto'});
+    num.textContent=('0'+(k+1)).slice(-2);cap.textContent=slides[k].dataset.cap;
+    if(anim){pulse(num);pulse(cap)}
+  }
+  function state(){ba.classList.toggle('paused',hover||!vis||stopped)}
+  play.addEventListener('click',function(){stopped=!stopped;play.classList.toggle('stopped',stopped);play.setAttribute('aria-label',stopped?'自動送りを再開する':'自動送りを止める');state()});
+  if(!anim)play.hidden=true;
+  bars.forEach(function(b,j){
+    b.addEventListener('click',function(){show(j)});
+    b.querySelector('i').addEventListener('animationend',function(){if(j===cur)show(cur+1)});
+  });
+  document.getElementById('ba-prev').addEventListener('click',function(){show(cur-1)});
+  document.getElementById('ba-next').addEventListener('click',function(){show(cur+1)});
+  stage.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'){show(cur-1);e.preventDefault()}if(e.key==='ArrowRight'){show(cur+1);e.preventDefault()}});
+  stage.addEventListener('mouseenter',function(){hover=true;state()});
+  stage.addEventListener('mouseleave',function(){hover=false;state()});
+  var x0=null,y0=0;
+  stage.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;y0=e.touches[0].clientY;hover=true;state()},{passive:true});
+  stage.addEventListener('touchend',function(e){
+    hover=false;state();if(x0===null)return;
+    var dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy))show(cur+(dx<0?1:-1));
+  },{passive:true});
+  if(anim&&'IntersectionObserver' in window){
+    slides[0].classList.remove('on');state();
+    new IntersectionObserver(function(es){vis=es[0].isIntersecting;if(vis&&cur<0)show(0);state()},{threshold:.3}).observe(stage);
+  }else{vis=true;show(0)}
+})();
 </script>
 </body>
 </html>
